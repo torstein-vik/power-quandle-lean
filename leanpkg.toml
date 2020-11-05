@@ -1,0 +1,8 @@
+[package]
+name = "power-quandle-lean"
+version = "0.1"
+lean_version = "leanprover-community/lean:3.23.0"
+path = "src"
+
+[dependencies]
+mathlib = {git = "https://github.com/leanprover-community/mathlib", rev = "834d491dd7c0aa0ed423bf1253d6d56182f6aa6e"}
