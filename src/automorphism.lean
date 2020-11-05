@@ -2,6 +2,8 @@
 import quandle
 import group_to_pq
 
+import tactic
+
 universe u
 
 section automorphism_power_quandle
@@ -295,9 +297,11 @@ begin
                 },
             },
             {
-                rw pow_int_to_nat,
-                rw pow_succ_group,
-                rw ←pow_int_to_nat,
+                --rw pow_of_nat,
+                simp,
+                rw gpow_add_one,
+                simp at hm,
+                simp,
                 rw ←hm,
                 rw automorphism_eq,
                 split,
@@ -312,7 +316,6 @@ begin
                     rw power_quandle.pow_comp,
                     rw power_quandle.q_powadd,
                     simp,
-                    rw int.add_comm,
                 },
                 {
                     rw automorphism_finv_of_comp,
@@ -325,6 +328,7 @@ begin
                     rw power_quandle.pow_comp,
                     rw q_powadd_left,
                     simp,
+                    rw int.add_comm,
                 },
             },
         },
@@ -334,8 +338,9 @@ begin
                 rw automorphism_eq,
                 split,
                 {
-                    rw pow_neg_succ_of_nat,
-                    rw pow_1_nat_group,
+                    --rw pow_neg_succ_of_nat,
+                    --rw pow_1_nat_group,
+                    simp,
                     rw automorphism_f_of_inverse,
                     rw element_automorphism_finv,
                     rw element_automorphism_f,
@@ -345,8 +350,9 @@ begin
                     refl,
                 },
                 {
-                    rw pow_neg_succ_of_nat,
-                    rw pow_1_nat_group,
+                    --rw pow_neg_succ_of_nat,
+                    --rw pow_1_nat_group,
+                    simp,
                     rw automorphism_finv_of_inverse,
                     rw element_automorphism_f,
                     rw element_automorphism_finv,
@@ -362,7 +368,10 @@ begin
                 },
             },
             {
-                rw pow_neg_succ_of_nat_succ,
+                --rw pow_neg_succ_of_nat_succ,
+                have ar_rw : -[1+ m.succ] = -[1+ m] - 1 := rfl,
+                rw ar_rw,
+                rw gpow_sub_one,
                 rw ←hm,
                 rw automorphism_eq,
                 split,

@@ -91,6 +91,7 @@ end
 
 instance group_to_pq_quandle : quandle Q := ⟨self_idem_right_group, self_idem_left_group⟩
 
+/-
 def pq_pow_nat : Q -> nat -> Q
 | q 0 := 1
 | q (nat.succ n) := q * pq_pow_nat q n
@@ -573,11 +574,13 @@ begin
     
 end
 
+-/
+
 lemma q_pow0_group : ∀ a b : Q, a ▷ (pow b 0) = pow b 0 :=
 begin
     intros a b,
     rw rhd_def,
-    rw pow_0,
+    --rw pow_0,
     simp,
 end
 
@@ -589,13 +592,15 @@ begin
 
     induction n with m hm,
     {
-        rw pow_0,
-        rw pow_0,
+        --rw pow_0,
+        --rw pow_0,
         simp,
     },
     {
-        rw pow_succ_group,
-        rw pow_succ_group,
+        --rw pow_succ_group,
+        --rw pow_succ_group,
+        rw pow_succ,
+        rw pow_succ,
         rw hm,
         repeat {rw ←mul_assoc},
         simp,
@@ -662,21 +667,22 @@ lemma q_powneg_left_group : ∀ a b : Q, b ◁ a = (pow a (-1 : int)) ▷ b :=
 begin
     intros a b,
     rw q_inv_left_to_right,
-    rw pow_is_inv,
+    rw gpow_neg_one,
 end
 
 lemma q_powadd_group : ∀ a b : Q, ∀ n m : int, (pow a n) ▷ ((pow a m) ▷ b) = (a^(n + m) ▷ b) :=
 begin
     intros a b n m,
     repeat {rw rhd_def},
-    rw ←pow_mult,
+    rw gpow_add,
+    --rw ←pow_mult,
     simp,
     repeat {rw ←mul_assoc},
 end
 
 instance group_is_pq : power_quandle Q := power_quandle.mk
-(pow_1_group)
-(pow_comp_group)
+(gpow_one)--(pow_1_group)
+(begin intros, apply eq.symm, apply gpow_mul end)--(pow_comp_group)
 (q_pow0_group)
 (q_pown_right_group)
 --(q_pown_left)
@@ -713,13 +719,14 @@ begin
             intro m,
             induction m with l hl,
             {
-                rw pow_0,
-                rw pow_0,
+                --rw pow_0,
+                --rw pow_0,
+                simp,
                 exact hf2,
             },
             {
-                rw pow_succ_group,
-                rw pow_succ_group,
+                rw pow_succ,
+                rw pow_succ,
                 rw hf1,
                 apply congr_arg,
                 exact hl,
@@ -800,15 +807,18 @@ begin
     split,
     {
         specialize hf2 1 0,
-        rw pow_0_int at hf2,
-        rw pow_0_int at hf2,
+        --rw pow_0_int at hf2,
+        --rw pow_0_int at hf2,
+        simp at hf2,
         exact hf2,
     },
     {
         intro a,
         specialize hf2 a (-1 : int),
-        rw pow_is_inv,
-        rw pow_is_inv,
+        --rw pow_is_inv,
+        --rw pow_is_inv,
+        rw ←gpow_neg_one,
+        rw ←gpow_neg_one,
         exact hf2,
     },
 end

@@ -2,8 +2,10 @@
 -- Very heavy inspiration from https://github.com/leanprover-community/mathlib/blob/master/src/algebra/quandle.lean
 
 import quandle
+import group_to_pq
 
 import algebra.group
+import data.zmod.basic
 
 universe u
 
@@ -12,7 +14,7 @@ universe u
 -- TOOD: Cylic is sent to Cyclic
 -- TODO: Dihedral is sent to Dihedral (x C2)
 
-section pre_pq_group
+section pq_group
 
 inductive pre_pq_group (Q : Type u) : Type u
 | unit : pre_pq_group
@@ -172,8 +174,11 @@ begin
         induction n with m hm,
         {
             rw pow_eq_pow_succ_mul_inv,
+            have ar_rw : -[1+ 0] + 1 = 0 := rfl,
+            rw ar_rw,
+            --simp,
+            rw pow_zero_eq_unit,
             simp,
-            apply pow_zero_eq_unit,
         },
         {
             rw pow_eq_pow_succ_mul_inv,
@@ -189,4 +194,86 @@ end
 
 
 
-end pre_pq_group
+end pq_group
+
+
+section group_to_to_group_comonad 
+
+
+
+end group_to_to_group_comonad
+
+
+
+section cyclic_pq_group
+
+
+structure cyclic (n : nat) :=
+(val : zmod n)
+
+variables {n : nat}
+
+def cyclic_mul : cyclic n → cyclic n → cyclic n
+| ⟨a⟩ ⟨b⟩ := ⟨a + b⟩
+
+def cyclic_inv : cyclic n → cyclic n
+| ⟨a⟩ := ⟨-a⟩
+
+instance cyclic_has_mul : has_mul (cyclic n) := ⟨cyclic_mul⟩
+
+instance cyclic_has_neg : has_inv (cyclic n) := ⟨cyclic_inv⟩ 
+
+instance cyclic_has_one : has_one (cyclic n) := ⟨⟨0⟩⟩
+
+
+lemma cyclic_mul_def (a b : zmod n) : (⟨a⟩ * ⟨b⟩ : cyclic n) = ⟨a + b⟩ := rfl
+
+lemma cyclic_inv_def (a : zmod n) : (⟨a⟩⁻¹ : cyclic n) = ⟨-a⟩ := rfl
+
+lemma cyclic_one_def : (1 : cyclic n) = ⟨0⟩ := rfl
+
+
+instance cyclic_group : group (cyclic n) :=
+{
+    mul_assoc := begin
+        rintros ⟨a⟩ ⟨b⟩ ⟨c⟩,
+        repeat {rw cyclic_mul_def},
+        apply congr_arg,
+        apply add_assoc,
+    end,
+    one_mul := begin
+        rintro ⟨a⟩,
+        rw cyclic_one_def,
+        rw cyclic_mul_def,
+        apply congr_arg,
+        apply zero_add,
+    end,
+    mul_one := begin
+        rintro ⟨a⟩,
+        rw cyclic_one_def,
+        rw cyclic_mul_def,
+        apply congr_arg,
+        apply add_zero,
+    end,
+    mul_left_inv := begin
+        rintro ⟨a⟩,
+        rw cyclic_inv_def,
+        rw cyclic_mul_def,
+        rw cyclic_one_def,
+        apply congr_arg,
+        apply add_left_neg,
+    end,
+    ..cyclic_has_mul,
+    ..cyclic_has_neg,
+    ..cyclic_has_one,
+}
+
+
+def cyclic_pq_group := pq_group (cyclic n)
+
+
+
+
+
+end cyclic_pq_group
+
