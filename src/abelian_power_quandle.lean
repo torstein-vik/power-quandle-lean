@@ -22,7 +22,7 @@ variables {Q : Type u} [abelian_power_quandle Q]
 lemma rhd_interact_add : ∀ a b c d : Q, (a ▷ b) + (c ▷ d) = (a + c) ▷ (b + d) := 
 begin
     intros a b c d,
-    have add_is_morph := abelian_power_quandle.apq_addition_is_morphism Q,
+    have add_is_morph := abelian_power_quandle.apq_addition_is_morphism,
     cases add_is_morph with h _,
     have h1 := h (a, c) (b, d),
     simp at h1,
@@ -35,7 +35,7 @@ end
 lemma pow_dist_add : ∀ a b : Q, ∀ n : int, (a + b) ^ n = a ^ n + b ^ n := 
 begin
     intros a b n,
-    have add_is_morph := abelian_power_quandle.apq_addition_is_morphism Q,
+    have add_is_morph := abelian_power_quandle.apq_addition_is_morphism,
     cases add_is_morph with _ h,
     have h1 := h (a, b) n,
     simp at h1,
@@ -117,18 +117,17 @@ end
 lemma apq_zero_pow : ∀ n : int, (0 : Q) ^ n = 0 :=
 begin
     intro n,
-    have u_morph := abelian_power_quandle.apq_unit_is_morphism Q,
+    have u_morph := abelian_power_quandle.apq_unit_is_morphism,
     simp at u_morph,
     cases u_morph with h1 h2,
     simp at h2,
     rw ←h2,
-    exact unit.star,
 end
 
 lemma apq_neg_pow : ∀ a : Q, ∀ n : int, (-a) ^ n = -(a ^ n) :=
 begin
     intros a n,
-    have neg_morph := abelian_power_quandle.apq_inverse_is_morphism Q,
+    have neg_morph := abelian_power_quandle.apq_inverse_is_morphism,
     cases neg_morph with h1 h2,
     simp at h2,
     rw h2,
@@ -285,7 +284,7 @@ begin
         simp,
         rw prod_zero_def,
         rw rhd_def_prod,
-        simp,
+        --simp,
         repeat {rw apq_rhd_is_right},
     },
     {
@@ -293,7 +292,7 @@ begin
         simp,
         rw prod_zero_def,
         rw pow_def_prod,
-        simp,
+        --simp,
         repeat {rw apq_zero_pow},
     },
 end
@@ -307,7 +306,7 @@ begin
         simp,
         repeat {rw rhd_def_prod},
         repeat {rw prod_neg_def},
-        simp,
+        --simp,
         repeat {rw apq_rhd_is_right},
     },
     {
@@ -315,7 +314,7 @@ begin
         simp,
         repeat {rw pow_def_prod},
         repeat {rw prod_neg_def},
-        simp,
+        --simp,
         repeat {rw apq_neg_pow},
     },
 end
@@ -329,7 +328,7 @@ begin
         simp,
         repeat {rw rhd_def_prod},
         repeat {rw prod_add_def},
-        simp,
+        --simp,
         repeat {rw rhd_interact_add},
     },
     {
@@ -337,7 +336,7 @@ begin
         simp,
         repeat {rw pow_def_prod},
         repeat {rw prod_add_def},
-        simp,
+        --simp,
         repeat {rw pow_dist_add},
     },
 end
@@ -387,7 +386,7 @@ begin
     intro a,
     rw prod_add_def,
     rw prod_neg_def,
-    simp,
+    --simp,
     repeat {rw abelian_power_quandle.apq_inverse_addition_right},
     refl,
 end
@@ -398,7 +397,7 @@ begin
     intro a,
     rw prod_add_def,
     rw prod_neg_def,
-    simp,
+    --simp,
     repeat {rw abelian_power_quandle.apq_inverse_addition_left},
     refl,
 end
@@ -472,7 +471,7 @@ begin
             intros a b,
             repeat {rw f_def},
             rw prod_add_def,
-            simp,
+            --simp,
             repeat {rw hf₁a},
             repeat {rw hf₂a},
         },
@@ -480,7 +479,7 @@ begin
             intros a n,
             repeat {rw f_def},
             rw pow_def_prod,
-            simp,
+            --simp,
             repeat {rw hf₁b},
             repeat {rw hf₂b},
         },

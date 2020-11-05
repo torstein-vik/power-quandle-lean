@@ -3,6 +3,8 @@
 
 import quandle
 
+import algebra.group
+
 universes u v
 
 section group_to_pq
@@ -27,7 +29,6 @@ lemma right_dist_group : ∀ a b c : Q, a ▷ (b ▷ c) = (a ▷ b) ▷ (a ▷ c
     simp,
     repeat {rw mul_assoc},
     repeat {rw ← mul_assoc}, 
-    simp,
 end
 
 lemma q_inv_left_to_right : ∀ a b : Q, b ◁ a = a⁻¹ ▷ b := begin 
@@ -42,7 +43,6 @@ lemma inv_q_right : ∀ a b : Q, (a ▷ b)⁻¹ = a ▷ b⁻¹ := begin
     rw rhd_def,
     rw rhd_def,
     simp,
-    rw mul_assoc,
 end
 
 lemma left_dist_group : ∀ a b c : Q, (c ◁ b) ◁ a = (c ◁ a) ◁ (b ◁ a) := begin
@@ -66,8 +66,6 @@ lemma left_inv_group : ∀ a b : Q, a ▷ (b ◁ a) = b := begin
     rw q_inv_left_to_right,
     repeat {rw rhd_def},
     repeat {rw ←mul_assoc},
-    simp,
-    rw mul_assoc,
     simp,
 end
 
@@ -167,7 +165,7 @@ begin
     refl,
 end
 
-lemma pow_succ : ∀ a : Q, ∀ n : nat, a ^ (nat.succ n) = a * a ^ n :=
+lemma pow_succ_group : ∀ a : Q, ∀ n : nat, a ^ (nat.succ n) = a * a ^ n :=
 begin
     intros a b,
     refl,
@@ -183,7 +181,7 @@ lemma pow_neg_succ_of_nat_succ : ∀ a : Q, ∀ n : nat, a ^ (int.neg_succ_of_na
 begin 
     intros a n,
     rw pow_neg_succ_of_nat,
-    rw pow_succ,
+    rw pow_succ_group,
     simp,
     refl,
 end
@@ -251,7 +249,7 @@ begin
                     have sum_eq_zero : -[1+ l2] + int.of_nat (nat.succ l2) = 0,
                     {
                         rw ←int.neg_of_nat_of_succ,
-                        simp,
+                        ring,
                     },
                     rw add_assoc,
                     rw sum_eq_zero,
@@ -282,26 +280,23 @@ begin
                                 rw ←int.of_nat_eq_coe,
                                 rw int.of_nat_add,
                                 rw int.of_nat_eq_coe,
-                                simp,
-                                refl,
+                                ring,
                             },
                             rw add_assoc,
                             rw add_assoc,
                             rw sum_eq_zero,
                             simp,
-                            refl,
                         },
                         rw n_eq,
                         repeat {rw ←add_assoc},
                         have sum_eq_zero : int.of_nat (nat.succ d2) + -[1+ d2] = 0,
                         {
                             rw ←int.neg_of_nat_of_succ,
-                            simp,
+                            ring,
                         },
                         rw sum_eq_zero,
                         simp,
                         rw add_comm,
-                        refl,
                     },
                     rw l2_eq,
                 },
@@ -352,7 +347,7 @@ begin
             rw pow_mult_nat_int,
             apply congr_arg,
             rw int.neg_succ_of_nat_coe,
-            simp,
+            ring,
         },
         rw other_side,
         simp,
@@ -374,7 +369,7 @@ begin
         have hs2 : a ^ (n * nat.succ k) = a ^ (n + n * k),
         {
             rw nat.mul_succ,
-            simp,
+            rw nat.add_comm,
         },
         rw hs2,
         rw ←pow_mult_nat a n (n * k),
@@ -445,13 +440,13 @@ begin
         simp,
     },
     {
-        rw pow_succ,
+        rw pow_succ_group,
         rw mul_assoc,
         rw hm,
     },
 end
 
-lemma pow_inv_comm_nat : ∀ a : Q, ∀ n : nat, a⁻¹ ^ n = (a ^ n)⁻¹ :=
+lemma pow_inv_comm_group_nat : ∀ a : Q, ∀ n : nat, a⁻¹ ^ n = (a ^ n)⁻¹ :=
 begin
     intros a n,
     induction n with l hl,
@@ -461,15 +456,15 @@ begin
         simp,
     },
     {
-        rw pow_succ,
-        rw pow_succ,
+        rw pow_succ_group,
+        rw pow_succ_group,
         simp,
         rw ←hl,
         rw mul_pow_is_pow_mul_nat,
     },
 end
 
-lemma pow_inv_comm : ∀ a : Q, ∀ k : int, a⁻¹ ^ k = (a^k)⁻¹ :=
+lemma pow_inv_comm_group : ∀ a : Q, ∀ k : int, a⁻¹ ^ k = (a^k)⁻¹ :=
 begin
     intros a k,
     induction k with k1 k2,
@@ -481,7 +476,7 @@ begin
         },
         rw pow_def,
         rw pow_def,
-        rw pow_inv_comm_nat,
+        rw pow_inv_comm_group_nat,
     },
     {
         have pow_def : ∀ b : Q, ∀ k : nat, b ^ (int.neg_succ_of_nat k) = (b ^ nat.succ k)⁻¹,
@@ -491,7 +486,7 @@ begin
         },
         rw pow_def,
         rw pow_def,
-        rw pow_inv_comm_nat,
+        rw pow_inv_comm_group_nat,
     },
 end
 
@@ -570,7 +565,7 @@ begin
             rw neg_mul_eq_neg_mul_symm,
         },
         rw prod_rw,
-        rw pow_inv_comm,
+        rw pow_inv_comm_group,
         rw pow_neg_is_pow_inv,
         rw pow_comp_nat_int,
         rw int.mul_comm,
@@ -599,8 +594,8 @@ begin
         simp,
     },
     {
-        rw pow_succ,
-        rw pow_succ,
+        rw pow_succ_group,
+        rw pow_succ_group,
         rw hm,
         repeat {rw ←mul_assoc},
         simp,
@@ -723,8 +718,8 @@ begin
                 exact hf2,
             },
             {
-                rw pow_succ,
-                rw pow_succ,
+                rw pow_succ_group,
+                rw pow_succ_group,
                 rw hf1,
                 apply congr_arg,
                 exact hl,

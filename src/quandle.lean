@@ -1,4 +1,6 @@
 
+import tactic
+
 -- TODO: Define pq for union, which is coproduct (?). Also universal property.
 
 universes u v w
@@ -60,6 +62,7 @@ begin
     repeat {rw power_quandle.pow_comp},
     rw power_quandle.q_powadd,
     simp,
+    rw int.add_comm,
 end
 
 lemma pow_0_rhd : ∀ a b : Q, a ^ (0 : int) ▷ b = b :=
@@ -144,13 +147,11 @@ begin
             rw ←int.of_nat_eq_coe,
             rw int.of_nat_add,
             simp,
+            rw int.add_comm (-1) (-1 + -↑l),
             rw ←power_quandle.q_powadd,
-            have int_one : int.of_nat 1 = (1 : int),
-            {
-                refl,
-            },
-            rw int_one,
             rw a_inv_rhd_an a m,
+            rw int.neg_succ_of_nat_coe at hl,
+            simp at hl,
             assumption,
         },
     },
@@ -328,7 +329,7 @@ lemma pow_comp_prod : ∀ a : Q1 × Q2, ∀ n m : int, (a^n)^m = a^(n * m) :=
 begin
     intros a n m,
     repeat {rw pow_def_prod},
-    simp,
+    --simp,
     repeat {rw power_quandle.pow_comp},
 end
 
@@ -338,7 +339,7 @@ begin
     intros a b,
     repeat {rw pow_def_prod},
     rw rhd_def_prod,
-    simp,
+    --simp,
     repeat {rw power_quandle.q_pow0},
 end
 
@@ -348,7 +349,7 @@ begin
     intros a b n,
     repeat {rw pow_def_prod},
     repeat {rw rhd_def_prod},
-    simp,
+    --simp,
     repeat {rw power_quandle.q_pown_right},
 end
 
@@ -358,7 +359,7 @@ begin
     intros a b n,
     repeat {rw pow_def_prod},
     repeat {rw lhd_def_prod},
-    simp,
+    --simp,
     repeat {rw q_pown_left},
 end
 
@@ -369,7 +370,7 @@ begin
     rw rhd_def_prod,
     rw lhd_def_prod,
     repeat {rw pow_def_prod},
-    simp,
+    --simp,
     repeat {rw q_powneg_right},
 end
 
@@ -380,7 +381,7 @@ begin
     rw rhd_def_prod,
     rw lhd_def_prod,
     repeat {rw pow_def_prod},
-    simp,
+    --simp,
     repeat {rw power_quandle.q_powneg_left},
 end
 
@@ -390,7 +391,7 @@ begin
     intros a b n m,
     repeat {rw rhd_def_prod},
     repeat {rw pow_def_prod},
-    simp,
+    --simp,
     repeat {rw power_quandle.q_powadd},
 end
 
@@ -466,7 +467,7 @@ begin
             intros a b,
             repeat {rw f_def},
             rw rhd_def_prod,
-            simp,
+            --simp,
             repeat {rw hf₁a},
             repeat {rw hf₂a},
         },
@@ -474,7 +475,7 @@ begin
             intros a n,
             repeat {rw f_def},
             rw pow_def_prod,
-            simp,
+            --simp,
             repeat {rw hf₁b},
             repeat {rw hf₂b},
         },
