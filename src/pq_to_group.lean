@@ -199,6 +199,103 @@ end pq_group
 
 section group_to_to_group_comonad 
 
+open pre_pq_group
+
+variables {G : Type*} [group G]
+
+def counit_pre : pre_pq_group G → G
+| unit := (1 : G)
+| (incl a) := a
+| (mul a b) := (counit_pre a) * (counit_pre b)
+| (inv a) := (counit_pre a)⁻¹
+
+def counit_fun : pq_group G → G := λ x, quotient.lift_on x (counit_pre) (begin
+    intros a b,
+    intro hab,
+    induction hab with c d habr,
+    clear x,
+    clear a,
+    clear b,
+    induction habr,
+    {
+        refl,
+    },
+    {
+        apply eq.symm,
+        assumption,
+    },
+    {
+        apply eq.trans habr_ih_hab habr_ih_hbc,
+    },
+    {
+        unfold counit_pre,
+        apply congr_arg2,
+        assumption,
+        assumption,
+    },
+    {
+        unfold counit_pre,
+        apply congr_arg,
+        assumption,
+    },
+    {
+        unfold counit_pre,
+        apply mul_assoc,
+    },
+    {
+        unfold counit_pre,
+        apply one_mul,
+    },
+    {
+        unfold counit_pre,
+        apply mul_one,
+    },
+    {
+        unfold counit_pre,
+        apply mul_left_inv,
+    },
+    {
+        unfold counit_pre,
+        apply rhd_def,
+    },
+    {
+        unfold counit_pre,
+        group,
+    },
+    {
+        unfold counit_pre,
+        group,
+    },
+    {
+        unfold counit_pre,
+        group,
+    },
+end)
+
+
+def counit : pq_group G →* G := ⟨counit_fun, begin
+    refl,
+end, begin
+    intros x y,
+    induction x,
+    induction y,
+    {
+        refl,
+    },
+    {refl,},
+    {refl,},
+end⟩
+
+
+lemma counit_surjective : function.surjective (counit : pq_group G → G) :=
+begin
+    intro b,
+    use ⟦incl b⟧,
+    refl,
+end 
+
+
+lemma counit_of (a : G) : counit (of a) = a := rfl
 
 
 end group_to_to_group_comonad
@@ -268,11 +365,136 @@ instance cyclic_group : group (cyclic n) :=
     ..cyclic_has_one,
 }
 
+def generator : (cyclic n) := ⟨1⟩ 
 
-def cyclic_pq_group := pq_group (cyclic n)
+lemma cyclic_as_power (x : cyclic n) : ∃ k : int, x = generator^k :=
+begin
+    induction x,
+    use (zmod.val_min_abs x),
+    --simp at *,
+    have gen_pow : ∀ k : int, (⟨k⟩ : cyclic n) = generator ^ k,
+    {
+        intro k,
+        induction k,
+        {
+            induction k with l hl,
+            {
+                refl,
+            },
+            {
+                simp at *,
+                rw gpow_add_one,
+                simp,
+                rw ←hl,
+                refl,
+            },
+        },
+        {
+            induction k with l hl,
+            {
+                simp,
+                refl,
+            },
+            {
+                simp at *,
+                rw pow_succ,
+                simp,
+                rw ←hl,
+                apply congr_arg,
+                ring,
+            },
+        },
+    },
+    have h := gen_pow (x.val_min_abs),
+    simp at h,
+    assumption,
+end
 
 
+lemma cyclic_counit_form : function.surjective (of : (cyclic n) → pq_group (cyclic n)) :=
+begin
+    intro x,
+    induction x,
+    {
+        induction x,
+        {
+            use 1,
+            apply quotient.sound,
+            fconstructor,
+            apply pre_pq_group_rel'.pow_zero,
+            exact 1,
+        },
+        {
+            use x,
+            refl,
+        },
+        {
+            cases x_ih_a with a ha,
+            cases x_ih_b with b hb,
+            use (a * b),
+            --apply quotient.sound,
+            have ha2 := cyclic_as_power a,
+            have hb2 := cyclic_as_power b,
+            cases ha2 with k hk,
+            cases hb2 with l hl,
+            rw hk,
+            rw hl,
+            rw ←gpow_add,
+            rw of_pow_eq_pow_of,
+            have hr : quot.mk setoid.r (x_a.mul x_b) = ((quot.mk setoid.r x_a) * (quot.mk setoid.r x_b) : pq_group (cyclic n)),
+            {
+                refl,
+            },
+            rw hr,
+            rw ←ha,
+            rw ←hb,
+            rw hk,
+            rw hl,
+            rw of_pow_eq_pow_of,
+            rw of_pow_eq_pow_of,
+            rw ←gpow_add,
+        },
+        {
+            cases x_ih with y hy,
+            use (y ^ (-1 : int)),
+            rw of_pow_eq_pow_of,
+            rw hy,
+            simp,
+            refl,
+        },
+    },
+    {refl,},
+end
 
+
+theorem cyclic_counit_bijective : function.bijective (counit : pq_group (cyclic n) → cyclic n) :=
+begin
+    split,
+    {
+        intros x y,
+        intro hxy,
+        have hx := cyclic_counit_form x,
+        have hy := cyclic_counit_form y,
+        cases hx with xx hxx,
+        cases hy with yy hyy,
+        rw ←hxx at *,
+        rw ←hyy at *,
+        apply congr_arg,
+        repeat {rw counit_of at hxy},
+        assumption,
+    },
+    {
+        apply counit_surjective,
+    }
+end
+
+
+noncomputable theorem comonad_cyclic_iso : pq_group (cyclic n) ≃* cyclic n :=
+begin
+    fapply mul_equiv.of_bijective,
+    exact counit,
+    exact cyclic_counit_bijective,
+end
 
 
 end cyclic_pq_group
