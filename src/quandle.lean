@@ -179,6 +179,13 @@ begin
     rw ←power_quandle.q_powneg_left,
 end
 
+lemma rhd_preserved_by_morphism (f : Q1 → Q2) (hf : is_pq_morphism f) : ∀ a b : Q1, f(a ▷ b) = f(a) ▷ f(b) :=
+begin
+    intros a b,
+    cases hf with hf1 hf2,
+    rw hf1,
+end
+
 lemma id_is_pq_morphism : is_pq_morphism (id : Q1 → Q1) :=
 begin
     split,
