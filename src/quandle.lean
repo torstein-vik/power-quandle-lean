@@ -317,6 +317,7 @@ instance product_quandle : quandle (Q1 × Q2) := quandle.mk
 
 def pq_pow_prod (a : Q1 × Q2) (n : int) : (Q1 × Q2) := (a.1 ^ n, a.2 ^ n)
 
+@[priority std.priority.default-1]
 instance product_pq_has_pow : has_pow (Q1 × Q2) int := ⟨pq_pow_prod⟩
 
 lemma pow_def_prod (a : Q1 × Q2) (n : int) : a ^ n = (a.1 ^ n, a.2 ^ n) := rfl
