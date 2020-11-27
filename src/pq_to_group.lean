@@ -947,7 +947,18 @@ def f_on_KC2_fun : pq_group K → K × C2
 | a := (counit a, f_on_C2_fun a)
 
 
-def f_on_KC2 : pq_group K →* K × C2 := ⟨f_on_KC2_fun, sorry, sorry⟩
+def f_on_KC2 : pq_group K →* K × C2 := ⟨f_on_KC2_fun, rfl, begin
+    intros x y,
+    unfold f_on_KC2_fun,
+    simp only [true_and, monoid_hom.map_mul, prod.mk.inj_iff, eq_self_iff_true, prod.mk_mul_mk],
+    induction x,
+    induction y,
+    {
+        refl,
+    },
+    {refl,},
+    {refl,},
+end⟩
 
 
 /--
@@ -970,8 +981,163 @@ We test f_on_KC2 of f_on_KC2_inv
 def f_on_KC2_inv_fun : K × C2 → pq_group K
 | (a, b) := of(a.1, 1) * of (1, a.2) * (if (b.val = 0) then 1 else of (1, g) * of (g, 1) * of (g, g))
 
+lemma of_mul_C2_left (a b : C2) : of(a * b, (1 : C2)) = of(a, 1) * of(b, 1) :=
+begin
+    apply cyclic2cases a,
+    {
+        have one_eq2 : ((1, 1) : K) = 1 := rfl,
+        rw one_eq2,
+        rw of_1_eq_unit,
+        simp only [mul_one, one_mul],
+    },
+    {
+        apply cyclic2cases b,
+        {
+            have one_eq2 : ((1, 1) : K) = 1 := rfl,
+            rw one_eq2,
+            rw of_1_eq_unit,
+            simp only [mul_one, one_mul],
+        },
+        {
+            rw pqK_self_mul,
+            rw C2_self_mul,
+            have one_eq2 : ((1, 1) : K) = 1 := rfl,
+            rw one_eq2,
+            rw of_1_eq_unit,
+        },
+    },
+end
 
-def f_on_KC2_inv : K × C2 →* pq_group K := ⟨f_on_KC2_inv_fun, sorry, sorry⟩ 
+lemma of_mul_C2_right (a b : C2) : of((1 : C2), a * b) = of(1, a) * of(1, b) :=
+begin
+    apply cyclic2cases a,
+    {
+        have one_eq2 : ((1, 1) : K) = 1 := rfl,
+        rw one_eq2,
+        rw of_1_eq_unit,
+        simp only [mul_one, one_mul],
+    },
+    {
+        apply cyclic2cases b,
+        {
+            have one_eq2 : ((1, 1) : K) = 1 := rfl,
+            rw one_eq2,
+            rw of_1_eq_unit,
+            simp only [mul_one, one_mul],
+        },
+        {
+            rw pqK_self_mul,
+            rw C2_self_mul,
+            have one_eq2 : ((1, 1) : K) = 1 := rfl,
+            rw one_eq2,
+            rw of_1_eq_unit,
+        },
+    },
+end
+
+def f_on_KC2_inv : K × C2 →* pq_group K := ⟨f_on_KC2_inv_fun, begin
+    have one_eq : ((1, 1) : K × C2) = 1 := rfl,
+    rw ←one_eq,
+    unfold f_on_KC2_inv_fun,
+    rw if_pos,
+    swap, refl,
+    simp only [mul_one, prod.snd_one, prod.fst_one],
+    have one_eq2 : ((1, 1) : K) = 1 := rfl,
+    rw one_eq2,
+    rw of_1_eq_unit,
+    simp only [mul_one],
+end, begin
+    intros x y,
+    cases x with x1 x2,
+    cases y with y1 y2,
+    have mul_rw : (x1, x2) * (y1, y2) = (x1 * y1, x2 * y2) := rfl,
+    rw mul_rw,
+    clear mul_rw,
+    unfold f_on_KC2_inv_fun,
+    have reorder : ∀ a b c d : pq_group K, a * b * (c * d) = a * c * (b * d),
+    {
+        intros a b c d,
+        have redo_paren : ∀ a b c d : pq_group K, a * b * (c * d) = a * (b * c) * d,
+        intros a b c d, group,
+        rw redo_paren,
+        rw pqK_commute b c,
+        rw ←redo_paren, 
+    },
+    apply cyclic2cases x2;
+    apply cyclic2cases y2;
+    clear x2 y2,
+    {
+        rw if_pos,
+        swap, refl,
+        rw if_pos,
+        swap, refl,
+        simp only [prod.snd_mul, prod.fst_mul, mul_one],
+        cases x1 with x11 x12,
+        cases y1 with y11 y12,
+        simp only,
+        rw of_mul_C2_left,
+        rw of_mul_C2_right,
+        rw reorder,
+    },
+    {
+        rw if_neg,
+        swap, unfold generator, simp,
+        rw if_pos,
+        swap, refl,
+        rw if_neg,
+        swap, unfold generator, simp,
+        simp only [prod.snd_mul, prod.fst_mul, mul_one],
+        cases x1 with x11 x12,
+        cases y1 with y11 y12,
+        simp only,
+        rw of_mul_C2_left,
+        rw of_mul_C2_right,
+        suffices : of (x11, 1) * of (y11, 1) * (of (1, x12) * of (1, y12)) = of (x11, 1) * of (1, x12) * (of (y11, 1) * of (1, y12)),
+        rw this, group,
+        rw reorder,
+    },
+    {
+        rw if_neg,
+        swap, unfold generator, simp,
+        rw if_neg,
+        swap, unfold generator, simp,
+        rw if_pos,
+        swap, refl,
+        simp only [prod.snd_mul, prod.fst_mul, mul_one],
+        cases x1 with x11 x12,
+        cases y1 with y11 y12,
+        simp only,
+        rw of_mul_C2_left,
+        rw of_mul_C2_right,
+        rw pqK_commute _ ((of (y11, 1) * of (1, y12))),
+        group,
+        rw pqK_commute _ (of (1, y12)),
+        group,
+        rw pqK_commute _ (of (y11, 1)),
+        group,
+    },
+    {
+        rw if_pos,
+        swap, refl,
+        rw if_neg,
+        swap, unfold generator, simp,
+        simp only [prod.snd_mul, prod.fst_mul, mul_one],
+        cases x1 with x11 x12,
+        cases y1 with y11 y12,
+        simp only,
+        rw of_mul_C2_left,
+        rw of_mul_C2_right,
+        let x : pq_group K := (of (1, {val := 1}) * of ({val := 1}, 1) * of ({val := 1}, {val := 1})),
+        have x_def : x = (of (1, {val := 1}) * of ({val := 1}, 1) * of ({val := 1}, {val := 1})) := rfl,
+        rw ←x_def,
+        rw pqK_commute (of (y11, 1) * of (1, y12)) x,
+        rw reorder,
+        suffices : of (x11, 1) * of (1, x12) * (of (y11, 1) * of (1, y12)) = of (x11, 1) * of (1, x12) * (x * x) * (of (y11, 1) * of (1, y12)),
+        rw this, group,
+        rw pqK_self_mul,
+        simp only [mul_one],
+    },
+end⟩ 
 
 
 theorem f_on_KC2_inv_f_on_KC2 : f_on_KC2_inv ∘ f_on_KC2 = id :=
@@ -1151,47 +1317,13 @@ begin
     },
 end
 
-/-
-theorem f_on_KC2_injective : function.injective f_on_KC2 := begin
-    intros x y,
-    intro hxy,
-    injection hxy with hxy1 hxy2,
-    induction x,
-    induction y,
-    {
-        repeat {rw quot_mk_helper at hxy1},
-        repeat {rw quot_mk_helper at hxy2},
-        repeat {rw quot_mk_helper at hxy},
-        repeat {rw quot_mk_helper},
-        --apply quotient.sound,
-        induction x;
-        induction y,
-        {
-            refl,
-        },
-        {
-            rw counit_unit at hxy1,
-            rw counit_incl at hxy1,
-            rw ←hxy1,
-            --apply quotient.exact,
-            exact unit_eq_incl_1,
-        },
-        {
-            rw counit_mul at hxy1,
-            sorry,
-        },
-        sorry,
-    },
-    {refl,},
-    {refl,},
-end
+theorem klein_pq_group_iso_klein_c2 : pq_group K ≃* K × C2 := 
+{ to_fun := f_on_KC2,
+  inv_fun := f_on_KC2_inv,
+  left_inv := congr_fun f_on_KC2_inv_f_on_KC2,
+  right_inv := congr_fun f_on_KC2_f_on_KC2_inv,
+  map_mul' := is_mul_hom.map_mul ⇑f_on_KC2 }
 
-
-theorem f_on_KC2_surjective : function.surjective f_on_KC2 := sorry
-
-
-theorem f_on_KC2_bijective : function.bijective f_on_KC2 := sorry
--/
 
 end klein_pq_group
 
