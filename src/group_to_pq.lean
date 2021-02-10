@@ -1222,7 +1222,7 @@ begin
     }
 end
 
-
+/-
 noncomputable theorem group_center_iso (f : G → H) (hf : is_pq_morphism f) (hfb : function.bijective f) : 
     (subgroup.center G) ≃* (subgroup.center H) :=
 begin
@@ -1232,6 +1232,7 @@ begin
     cases y with y hy,
     sorry,
 end
+-/
 
 
 theorem group_order_bijection [fintype G] [decidable_eq G] [fintype H] [decidable_eq H] 

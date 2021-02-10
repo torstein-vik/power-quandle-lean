@@ -111,6 +111,7 @@ def of (a : Q) : pq_group Q := ⟦incl a⟧
 
 lemma of_def (a : Q) : of a = ⟦incl a⟧ := rfl
 
+lemma unit_def : (1 : pq_group Q) = ⟦unit⟧ := rfl
 
 lemma mul_def (a b : pre_pq_group Q) : (⟦a⟧ * ⟦b⟧ : pq_group Q) = ⟦mul a b⟧ := rfl
 
@@ -195,6 +196,224 @@ end
 
 
 end pq_group
+
+
+section pq_group_functor
+
+variables {Q1 Q2 : Type u} [power_quandle Q1] [power_quandle Q2]
+
+open pre_pq_group
+
+def L_of_morph_aux (f : Q1 → Q2) (hf : is_pq_morphism f) : pre_pq_group Q1 → pre_pq_group Q2
+| unit := unit
+| (incl a) := incl (f a)
+| (mul a b) := mul (L_of_morph_aux a) (L_of_morph_aux b)
+| (inv a) := inv (L_of_morph_aux a)
+
+def L_of_morph_fun (f : Q1 → Q2) (hf : is_pq_morphism f) : pq_group Q1 → pq_group Q2 := λ x, quotient.lift_on x (λ y, ⟦L_of_morph_aux f hf y⟧) (begin
+    intros a b hab,
+    induction hab with c d habr,
+    clear a b,
+    induction habr,
+    {
+        refl,
+    },
+    {
+        apply eq.symm,
+        assumption,
+    },
+    {
+        apply eq.trans habr_ih_hab habr_ih_hbc,
+    },
+    {
+        unfold L_of_morph_aux,
+        repeat {rw ←mul_def},
+        simp only at *,
+        apply congr_arg2,
+        assumption,
+        assumption,
+    },
+    {
+        simp only at *,
+        unfold L_of_morph_aux,
+        repeat {rw ←inv_def},
+        apply congr_arg,
+        assumption,
+    },
+    {
+        simp only at *,
+        unfold L_of_morph_aux,
+        repeat {rw ←mul_def},
+        apply mul_assoc,
+    },
+    {
+        simp only at *,
+        unfold L_of_morph_aux,
+        repeat {rw ←mul_def},
+        apply one_mul,
+    },
+    {
+        simp only at *,
+        unfold L_of_morph_aux,
+        repeat {rw ←mul_def},
+        apply mul_one,
+    },
+    {
+        simp only at *,
+        unfold L_of_morph_aux,
+        repeat {rw ←mul_def},
+        repeat {rw ←inv_def},
+        apply mul_left_inv,
+    },
+    {
+        simp only at *,
+        unfold L_of_morph_aux,
+        rw hf.1,
+        apply quotient.sound,
+        fconstructor,
+        apply pre_pq_group_rel'.rhd_conj,
+    },
+    {
+        simp only at *,
+        unfold L_of_morph_aux,
+        repeat {rw hf.2},
+        apply quotient.sound,
+        fconstructor,
+        apply pre_pq_group_rel'.pow_pred,
+    },
+    {
+        simp only at *,
+        unfold L_of_morph_aux,
+        repeat {rw hf.2},
+        apply quotient.sound,
+        fconstructor,
+        apply pre_pq_group_rel'.pow_succ,
+    },
+    {
+        simp only at *,
+        unfold L_of_morph_aux,
+        rw hf.2,
+        apply quotient.sound,
+        fconstructor,
+        apply pre_pq_group_rel'.pow_zero,
+    },
+end)
+
+def L_of_morph (f : Q1 → Q2) (hf : is_pq_morphism f) : pq_group Q1 →* pq_group Q2 := ⟨L_of_morph_fun f hf,
+begin
+    refl,
+end, begin
+    intros x y,
+    induction x,
+    induction y,
+    {
+        refl,
+    },
+    {refl,},
+    {refl,},
+end⟩
+
+
+def L_of_morph_iso (f : Q1 ≃ Q2) (hf : is_pq_morphism f.to_fun) : pq_group Q1 ≃* pq_group Q2 :=
+begin
+    fconstructor,
+    {
+        exact L_of_morph f.to_fun hf
+    },
+    {
+        refine L_of_morph f.inv_fun _,
+        split,
+        {
+            intros a b,
+            rw ←f.right_inv a,
+            rw ←f.right_inv b,
+            rw f.left_inv,
+            rw f.left_inv,
+            rw ←hf.1,
+            rw f.left_inv,
+        },
+        {
+            intros a n,
+            rw ←f.right_inv a,
+            rw ←hf.2,
+            rw f.left_inv,
+            rw f.left_inv,
+        },
+    },
+    {
+        intro x,
+        induction x,
+        {
+            unfold L_of_morph,
+            simp only [monoid_hom.coe_mk],
+            unfold L_of_morph_fun,
+            simp only [quotient.lift_on_beta],
+            induction x,
+            {
+                refl,
+            },
+            {
+                unfold L_of_morph_aux,
+                rw f.left_inv,
+                refl,
+            },
+            {
+                unfold L_of_morph_aux,
+                rw ←mul_def,
+                rw x_ih_a,
+                rw x_ih_b,
+                refl,
+            },
+            {
+                unfold L_of_morph_aux,
+                rw ←inv_def,
+                rw x_ih,
+                refl,
+            },
+        },
+        {refl,},
+    },
+    {
+        intro x,
+        induction x,
+        {
+            unfold L_of_morph,
+            simp only [monoid_hom.coe_mk],
+            unfold L_of_morph_fun,
+            simp only [quotient.lift_on_beta],
+            induction x,
+            {
+                refl,
+            },
+            {
+                unfold L_of_morph_aux,
+                rw f.right_inv,
+                refl,
+            },
+            {
+                unfold L_of_morph_aux,
+                rw ←mul_def,
+                rw x_ih_a,
+                rw x_ih_b,
+                refl,
+            },
+            {
+                unfold L_of_morph_aux,
+                rw ←inv_def,
+                rw x_ih,
+                refl,
+            },
+        },
+        {refl,},
+    },
+    {
+        intros x y,
+        exact is_mul_hom.map_mul ⇑(L_of_morph f.to_fun hf) x y,
+    },
+end 
+
+
+end pq_group_functor
 
 
 section group_to_to_group_comonad 
