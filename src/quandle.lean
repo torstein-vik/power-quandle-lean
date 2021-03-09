@@ -571,7 +571,7 @@ end terminal_power_quandle
 
 section power_quandle_union
 
-variables {Q1 : Type u} [power_quandle Q1] {Q2 : Type u} [power_quandle Q2]
+variables {Q1 : Type u} [power_quandle Q1] {Q2 : Type v} [power_quandle Q2]
 
 def triangle_right_union : (Q1 ⊕ Q2) → (Q1 ⊕ Q2) → (Q1 ⊕ Q2)
 | (sum.inl x) (sum.inl y) := sum.inl (x ▷ y)

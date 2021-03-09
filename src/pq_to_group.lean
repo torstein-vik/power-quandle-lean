@@ -8,7 +8,7 @@ import algebra.group
 import data.zmod.basic
 import data.int.parity
 
-universe u
+universes u v
 
 -- TODO: Define enveloping group of power quandle
 -- TODO: Universal property as adjoint to forgetful
@@ -128,6 +128,12 @@ begin
     exact (pre_pq_group_rel'.rhd_conj a b).rel
 end
 
+lemma rhd_of_eq_of_rhd : ∀ a b : Q, of a ▷ of b = of (a ▷ b) :=
+begin
+    intros a b,
+    rw rhd_def,
+    rw rhd_eq_conj,
+end
 
 lemma pow_eq_mul_pow_pred : ∀ a : Q, ∀ n : int, of (a ^ n) = of a * of (a ^ (n - 1)) :=
 begin
@@ -200,9 +206,16 @@ end pq_group
 
 section pq_group_functor
 
-variables {Q1 Q2 : Type u} [power_quandle Q1] [power_quandle Q2]
+variables {Q1 : Type u} [power_quandle Q1] {Q2 : Type v} [power_quandle Q2]
 
 open pre_pq_group
+
+lemma quot_mk_helper (a : pre_pq_group Q1) : quot.mk setoid.r a = ⟦a⟧ := rfl
+
+lemma incl_unit_eq_unit : (⟦unit⟧ : pq_group Q1) = (1 : pq_group Q1) := 
+begin
+    refl,
+end
 
 def L_of_morph_aux (f : Q1 → Q2) (hf : is_pq_morphism f) : pre_pq_group Q1 → pre_pq_group Q2
 | unit := unit
@@ -422,6 +435,103 @@ open pre_pq_group
 
 variables {G : Type*} [group G]
 
+variables {Q : Type*} [power_quandle Q]
+
+def pq_morph_to_L_morph_adj_pre (f : Q → G) (hf : is_pq_morphism f) : pre_pq_group Q → G
+| unit := (1 : G)
+| (incl a) := f(a)
+| (mul a b) := (pq_morph_to_L_morph_adj_pre a) * (pq_morph_to_L_morph_adj_pre b)
+| (inv a) := (pq_morph_to_L_morph_adj_pre a)⁻¹ 
+
+def pq_morph_to_L_morph_adj_fun (f : Q → G) (hf : is_pq_morphism f) : pq_group Q → G := λ x, quotient.lift_on x (pq_morph_to_L_morph_adj_pre f hf) (begin 
+    cases hf with hf1 hf2,
+    intros a b,
+    intro hab,
+    induction hab with c d habr,
+    clear x,
+    clear a,
+    clear b,
+    induction habr,
+    {
+        refl,
+    },
+    {
+        apply eq.symm,
+        assumption,
+    },
+    {
+        apply eq.trans habr_ih_hab habr_ih_hbc,
+    },
+    {
+        unfold pq_morph_to_L_morph_adj_pre,
+        apply congr_arg2,
+        assumption,
+        assumption,
+    },
+    {
+        unfold pq_morph_to_L_morph_adj_pre,
+        apply congr_arg,
+        assumption,
+    },
+    {
+        unfold pq_morph_to_L_morph_adj_pre,
+        apply mul_assoc,
+    },
+    {
+        unfold pq_morph_to_L_morph_adj_pre,
+        apply one_mul,
+    },
+    {
+        unfold pq_morph_to_L_morph_adj_pre,
+        apply mul_one,
+    },
+    {
+        unfold pq_morph_to_L_morph_adj_pre,
+        apply mul_left_inv,
+    },
+    {
+        unfold pq_morph_to_L_morph_adj_pre,
+        rw hf1,
+        apply rhd_def,
+    },
+    {
+        unfold pq_morph_to_L_morph_adj_pre,
+        repeat {rw hf2},
+        group,
+    },
+    {
+        unfold pq_morph_to_L_morph_adj_pre,
+        repeat {rw hf2},
+        group,
+    },
+    {
+        unfold pq_morph_to_L_morph_adj_pre,
+        repeat {rw hf2},
+        group,
+    },
+end)
+
+
+def pq_morph_to_L_morph_adj (f : Q → G) (hf : is_pq_morphism f) : pq_group Q →* G := ⟨pq_morph_to_L_morph_adj_fun f hf, begin
+    refl,
+end, begin
+    intros a b,
+    induction a,
+    induction b,
+    {
+        refl,
+    },
+    {refl,},
+    {refl,},
+end⟩
+
+lemma pq_morph_to_L_morph_adj_comm_of (f : Q → G) (hf : is_pq_morphism f) (a : Q) : pq_morph_to_L_morph_adj f hf (of a) = f a :=
+begin
+    refl,
+end
+
+/-
+
 def counit_pre : pre_pq_group G → G
 | unit := (1 : G)
 | (incl a) := a
@@ -504,7 +614,9 @@ end, begin
     {refl,},
     {refl,},
 end⟩
+-/
 
+def counit : pq_group G →* G := pq_morph_to_L_morph_adj id id_is_pq_morphism
 
 lemma counit_surjective : function.surjective (counit : pq_group G → G) :=
 begin
@@ -522,7 +634,6 @@ lemma counit_incl (a : G) : counit (⟦incl a⟧) = a := rfl
 lemma counit_mul (a b : pre_pq_group G) : counit ⟦mul a b⟧ = counit ⟦a⟧ * counit ⟦b⟧ := rfl
 lemma counit_inv (a : pre_pq_group G) : counit ⟦inv a⟧ = (counit ⟦a⟧)⁻¹ := rfl
 
-lemma quot_mk_helper (a : pre_pq_group G) : quot.mk setoid.r a = ⟦a⟧ := rfl
 
 lemma unit_eq_incl_1 : ⟦unit⟧ = (of 1 : pq_group G) :=
 begin
@@ -537,10 +648,6 @@ begin
     refl,
 end
 
-lemma incl_unit_eq_unit : (⟦unit⟧ : pq_group G) = (1 : pq_group G) := 
-begin
-    refl,
-end
 
 lemma pq_group_commute (a b : G) (hab : commute a b) : commute (of a) (of b) :=
 begin

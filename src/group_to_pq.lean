@@ -798,6 +798,20 @@ begin
     },
 end
 
+theorem functoriality_group_bundled_to_pq (f : G →* H) : is_pq_morphism f :=
+begin
+    apply functoriality_group_to_pq,
+    intros a b,
+    simp only [monoid_hom.map_mul],
+end
+
+theorem functoriality_group_iso_to_pq (f : G ≃* H) : is_pq_morphism f :=
+begin
+    apply functoriality_group_to_pq,
+    intros a b,
+    simp only [mul_equiv.map_mul],
+end
+
 -- composition and identity preservence is trivial
 
 theorem group_to_pq_fullness_almost (f : G → H) (hf : is_pq_morphism f) (hfs : function.surjective f) (hG : ∀ a b : H, (∀ c : H, a ▷ c = b ▷ c) → a = b) : is_group_morphism f :=
