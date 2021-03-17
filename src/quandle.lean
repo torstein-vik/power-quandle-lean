@@ -91,6 +91,13 @@ begin
     rw quandle.self_idem_right,
 end
 
+lemma pow_neg_one_rhd_self : ∀ a : Q , a ^ (-1 : ℤ) ▷ a = a :=
+begin
+    intro a,
+    rw ←power_quandle.q_powneg_left,
+    exact quandle.self_idem_left a,
+end
+
 lemma a_inv_rhd_an : ∀ a : Q, ∀ n : int, a ^ (-1 : int) ▷ a ^ n = a ^ n :=
 begin
     intros a n,
@@ -184,6 +191,13 @@ begin
     intros a b,
     cases hf with hf1 hf2,
     rw hf1,
+end
+
+lemma pow_preserved_by_morphism (f : Q1 → Q2) (hf : is_pq_morphism f) : ∀ a : Q1, ∀ n : ℤ, f(a ^ n) = (f a) ^ n :=
+begin
+    intros a n,
+    cases hf with hf1 hf2,
+    rw hf2,
 end
 
 lemma id_is_pq_morphism : is_pq_morphism (id : Q1 → Q1) :=
