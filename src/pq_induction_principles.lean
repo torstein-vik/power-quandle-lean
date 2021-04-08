@@ -104,7 +104,62 @@ begin
   {refl,},
 end
 
+theorem pq_group_list {P : pq_group Q → Prop}
+(hl : ∀ x : list Q, P (x.map of).prod)
+: ∀ x : pq_group Q, P x :=
+begin
+  intro x,
+  induction x,
+  {
+    rw quot_mk_helper,
+    let y := create_list_from_pq x,
+    have y_def : y = create_list_from_pq x := rfl,
+    have hy := create_list_from_pq_eq_id x,
+    rw ←y_def at hy,
+    rw ←hy,
+    apply hl,
+  },
+  {refl,},
+end
+
 end word_induction
+
+section morphism_equality
+
+variables {Q : Type u} [power_quandle Q]
+
+variables {G : Type v} [group G]
+
+theorem morphism_equality (f g : pq_group Q →* G) (hfg : ∀ q : Q, f (of q) = g (of q)) : f = g :=
+begin
+  ext1,
+  revert x,
+  refine pq_group_word_induction _ _,
+  {
+    simp only [monoid_hom.map_one],
+  },
+  {
+    intros x y hx,
+    simp only [monoid_hom.map_mul, hx, hfg],
+  },
+end
+
+theorem morphism_equality_elem (f g : pq_group Q →* G) (hfg : ∀ q : Q, f (of q) = g (of q)) (x : pq_group Q) : f x = g x :=
+begin
+  have me := morphism_equality f g hfg,
+  rw me,
+end
+
+theorem morphism_equality_elem_id (f : pq_group Q →* pq_group Q) (hf : ∀ q : Q, f (of q) = of q) (x : pq_group Q) : f x = x :=
+begin
+  have me := morphism_equality_elem f (monoid_hom.id (pq_group Q)) hf x,
+  simp only [monoid_hom.id_apply] at me,
+  rw me,
+end
+
+
+end morphism_equality
+
 
 /-
 def pq_group_word_induction_pre (α : pq_group Q → Sort v) 

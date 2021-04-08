@@ -100,6 +100,121 @@ begin
   },
 end
 
+
+def sub_pq_to_pq_group : (pq_group (gen_group_sub_pq (@of_gen_group_sub_pq Q _))) →* (pq_group Q) := 
+begin
+  fapply pq_morph_to_L_morph_adj,
+  {
+    intro x,
+    cases x with x hx,
+    exact x,
+  },
+  {
+    split,
+    {
+      intros a b,
+      cases a with a ha,
+      cases b with b hb,
+      simp only,
+      have hab := sub_power_quandle.closed_rhd _ a b ha hb,
+      have rhd_rw : (⟨a, ha⟩ : {x // x ∈ has_coe_t_aux.coe (gen_group_sub_pq of_gen_group_sub_pq)}) ▷ ⟨b, hb⟩ = ⟨a ▷ b, hab⟩ := rfl,
+      rw rhd_rw,
+    },
+    {
+      intros a n,
+      cases a with a ha,
+      simp only,
+      have han := sub_power_quandle.closed_pow _ a n ha,
+      have pow_rw : (⟨a, ha⟩ : {x // x ∈ has_coe_t_aux.coe (gen_group_sub_pq of_gen_group_sub_pq)}) ^ n = ⟨a ^ n, han⟩ := rfl,
+      rw pow_rw,
+    },
+  },
+end
+
+def pq_group_iso_sub_pq : (pq_group Q) ≃* (pq_group (gen_group_sub_pq (@of_gen_group_sub_pq Q _))) :=
+begin
+  fconstructor,
+  {
+    exact pq_group_to_sub_pq,
+  },
+  {
+    exact sub_pq_to_pq_group,
+  },
+  {
+    intro x,
+    induction x,
+    {
+      rw quot_mk_helper,
+      induction x,
+      {
+        rw incl_unit_eq_unit,
+        simp only [monoid_hom.map_one],
+      },
+      {
+        rw ←of_def,
+        unfold pq_group_to_sub_pq,
+        rw pq_morph_to_L_morph_adj_comm_of,
+        unfold sub_pq_to_pq_group,
+        rw pq_morph_to_L_morph_adj_comm_of,
+      },
+      {
+        rw ←mul_def,
+        simp only [monoid_hom.map_mul],
+        rw x_ih_a,
+        rw x_ih_b,
+      },
+      {
+        rw ←inv_def,
+        simp only [inv_inj, monoid_hom.map_inv],
+        assumption,
+      },
+    },
+    {refl,},
+  },
+  {
+    intro x,
+    induction x,
+    {
+      rw quot_mk_helper,
+      induction x,
+      {
+        rw incl_unit_eq_unit,
+        simp only [monoid_hom.map_one],
+      },
+      {
+        rw ←of_def,
+        unfold sub_pq_to_pq_group,
+        rw pq_morph_to_L_morph_adj_comm_of,
+        cases x with x hx,
+        simp only,
+        cases hx with y hy,
+        simp_rw hy,
+        unfold pq_group_to_sub_pq,
+        rw pq_morph_to_L_morph_adj_comm_of,
+        refl,
+      },
+      {
+        rw ←mul_def,
+        simp only [monoid_hom.map_mul],
+        rw x_ih_a,
+        rw x_ih_b,
+      },
+      {
+        rw ←inv_def,
+        simp only [inv_inj, monoid_hom.map_inv],
+        assumption,
+      },
+    },
+    {refl,},
+  },
+  {
+    intros a b,
+    simp only [monoid_hom.map_mul],
+  },
+end
+
+
+/-
 noncomputable def sub_pq_to_pq_group : (pq_group (gen_group_sub_pq (@of_gen_group_sub_pq Q _))) →* (pq_group Q) := 
 begin
   fapply pq_morph_to_L_morph_adj,
@@ -230,5 +345,7 @@ begin
     simp only [monoid_hom.map_mul],
   },
 end
+-/
+
 
 end minimal_sub_pq_L

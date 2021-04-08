@@ -200,6 +200,20 @@ begin
     },
 end
 
+variables {QG : Type u} {QH : Type v} [power_quandle QG] [power_quandle QH]
+
+lemma of_is_pq_morphism : is_pq_morphism (of : QH → pq_group QH) :=
+begin
+  split,
+  {
+    intros a b,
+    rw rhd_of_eq_of_rhd,
+  },
+  {
+    intros a n,
+    rw of_pow_eq_pow_of,
+  },
+end
 
 end pq_group
 
@@ -325,6 +339,8 @@ end, begin
     {refl,},
     {refl,},
 end⟩
+
+theorem L_of_morph_of (f : Q1 → Q2) (hf : is_pq_morphism f) (x : Q1) : (L_of_morph f hf) (of x) = of (f x) := rfl 
 
 
 def L_of_morph_iso (f : Q1 ≃ Q2) (hf : is_pq_morphism f.to_fun) : pq_group Q1 ≃* pq_group Q2 :=
