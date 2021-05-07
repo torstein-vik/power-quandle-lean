@@ -42,6 +42,8 @@ end
 
 end pq_hom_group_property
 
+/-
+
 section pq_hom_group_property_dual
 
 
@@ -159,4 +161,4 @@ end
 
 end pq_hom_group_property_dual
 
-
+-/

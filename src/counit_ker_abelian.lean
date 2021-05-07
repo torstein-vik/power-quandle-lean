@@ -427,6 +427,7 @@ end
 
 variables {H : Type v} [group H]
 
+/-
 noncomputable theorem ker_counit_GH_iso 
 (f : G ≃ H) (hf : is_pq_morphism f) (g : subgroup.center G ≃* subgroup.center H) : 
 ((counit : pq_group G →* G).ker) ≃* ((counit : pq_group H →* H).ker) :=
@@ -527,10 +528,11 @@ begin
     simp only [subgroup.coe_mul, subtype.coe_mk],
   }
 end
-
+-/
 
 end center_LR_morph
 
+/-
 section L_is_full_on_bijections
 
 variables {G : Type u} {H : Type v} [group G] [group H]
@@ -593,3 +595,4 @@ end
 
 
 end LR_lift_of_f
+-/

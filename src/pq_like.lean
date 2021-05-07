@@ -5,6 +5,8 @@ import counit_ker_abelian
 
 universes u1 u2 u3
 
+/-
+
 section pq_like
 
 variables {QG : Type u1} {QH : Type u2} [power_quandle QG] [power_quandle QH]
@@ -14,6 +16,7 @@ variables {QG : Type u1} {QH : Type u2} [power_quandle QG] [power_quandle QH]
 
 --include QG QH hG hH
 
+/-
 lemma of_is_pq_morphism : is_pq_morphism (of : QH → pq_group QH) :=
 begin
   split,
@@ -26,6 +29,7 @@ begin
     rw of_pow_eq_pow_of,
   },
 end
+-/
 
 def pq_like_morphism (f : pq_group QG ≃ pq_group QH) (hf : is_pq_morphism f) : pq_group QG →* pq_group QH :=
 begin
@@ -197,7 +201,7 @@ end
 
 
 end pq_like
-
+-/
 
 section pq_like_split
 
