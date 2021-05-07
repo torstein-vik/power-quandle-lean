@@ -16,6 +16,8 @@ variables {Q : Type u} [power_quandle Q]
 
 instance spq_coe_carrier : has_coe (sub_power_quandle Q) (set Q) := ⟨λ spq, spq.carrier⟩
 
+lemma spq_coe_is_carrier (Q1 : sub_power_quandle Q) : ↑Q1 = Q1.carrier := rfl
+
 variables {Q1 : sub_power_quandle Q}
 
 def spq_rhd : Q1 → Q1 → Q1 := λ ⟨x, hx⟩ ⟨y, hy⟩, ⟨x ▷ y, Q1.closed_rhd x y hx hy⟩

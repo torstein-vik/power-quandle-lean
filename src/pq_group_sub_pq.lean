@@ -35,18 +35,45 @@ end
 
 variables {G : Type*} [group G]
 
-lemma closure_mem_simple (s : set G) (x : G) (hx : x ∈ s) : x ∈ subgroup.closure s :=
-begin
-  intros s1 hs1,
-  cases hs1 with G1 hG1,
-  rw ←hG1,
-  simp only [subgroup.mem_coe, set.mem_Inter, set.mem_set_of_eq],
-  intro hs,
-  apply hs,
-  exact hx,
-end
+def pre_pq_group_in_sub_pq (Q1 : sub_power_quandle Q) : pre_pq_group Q → Prop
+| pre_pq_group.unit := true
+| (pre_pq_group.incl x) := x ∈ Q1.carrier
+| (pre_pq_group.mul x y) := pre_pq_group_in_sub_pq x ∧ pre_pq_group_in_sub_pq y
+| (pre_pq_group.inv x) := pre_pq_group_in_sub_pq x
 
-def subgroup_of_pq_supergroup (Q1 : sub_power_quandle Q) : subgroup (pq_group Q) := subgroup.closure (λ x, ∃ q : Q, q ∈ Q1.carrier ∧ x = of q)
+def subgroup_of_pq_supergroup (Q1 : sub_power_quandle Q) : subgroup (pq_group Q) := { 
+  carrier := λ x, ∃ y : pre_pq_group Q, ⟦y⟧ = x ∧ pre_pq_group_in_sub_pq Q1 y,
+  one_mem' := begin 
+    use pre_pq_group.unit,
+    split,
+    refl,
+    trivial,
+  end,
+  mul_mem' := begin 
+    intros a b ha hb,
+    cases ha with a1 ha1,
+    cases hb with b1 hb1,
+    cases ha1 with ha1 ha2,
+    cases hb1 with hb1 hb2,
+    use pre_pq_group.mul a1 b1,
+    split,
+    rw ←ha1,
+    rw ←hb1,
+    refl,
+    split,
+    assumption,
+    assumption,
+  end,
+  inv_mem' := begin 
+    intros a ha,
+    cases ha with a1 ha1,
+    cases ha1 with ha1 ha2,
+    use pre_pq_group.inv a1,
+    split,
+    rw ←ha1,
+    refl,
+    assumption,
+  end}
 
 def iso_subs_forward : pq_group Q1 →* subgroup_of_pq_supergroup Q1 :=
 begin
@@ -57,12 +84,10 @@ begin
     fconstructor,
     exact of q,
     unfold subgroup_of_pq_supergroup,
-    apply closure_mem_simple,
-    rw set.mem_def,
-    use q,
+    use pre_pq_group.incl q,
     split,
-    exact hq,
     refl,
+    exact hq,
   },
   {
     split,
@@ -88,6 +113,19 @@ begin
       ext1,
       simp only [subgroup.coe_gpow, subtype.coe_mk],
     },
+  },
+end
+
+theorem iso_subs_forward_bijective : function.bijective (iso_subs_forward : pq_group Q1 → subgroup_of_pq_supergroup Q1) :=
+begin
+  split,
+  {
+    refine iso_subs_forward.injective_iff.mpr _,
+    intros a ha,
+    unfold iso_subs_forward at ha,
+  },
+  {
+    sorry,
   },
 end
 

@@ -177,6 +177,20 @@ begin
   },
 end
 
+def pq_quotient_of : Q → pq_quotient Q := λ q, ⟦q⟧
+
+theorem pq_quotient_of_is_pq_morphism : is_pq_morphism (pq_quotient_of : Q → pq_quotient Q) :=
+begin
+  split,
+  {
+    intros a b,
+    refl,
+  },
+  {
+    intros a n,
+    refl,
+  },
+end
 
 variables {Q1 : Type u1} [power_quandle Q1]
 

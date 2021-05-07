@@ -42,6 +42,13 @@ begin
   }
 end
 
+lemma gen_set_counit_of (gen : set G) (x : free_gen_group_sub_pq gen) : gen_set_counit gen (of x) = x :=
+begin
+  unfold gen_set_counit,
+  rw pq_morph_to_L_morph_adj_comm_of,
+  cases x with x hx,
+  simp only [subtype.coe_mk],
+end
 
 theorem gen_set_counit_surjective (gen : set G) (hG : group_generated_by gen) : function.surjective (gen_set_counit gen) :=
 begin

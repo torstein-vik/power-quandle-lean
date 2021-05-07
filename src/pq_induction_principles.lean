@@ -160,6 +160,23 @@ end
 
 end morphism_equality
 
+/-
+section conjugation_induction
+
+variables {Q : Type u} [power_quandle Q]
+
+theorem conjugation_induction {P : pq_group Q → Prop}
+(hone : P 1)
+(hof : ∀ x : Q, P (of x))
+(hrhd : ∀ x y : pq_group Q, P x → P y → P (x ▷ y))
+(hpow : ∀ x : pq_group Q, ∀ n : ℤ, P x → P (x ^ n))
+: ∀ x : pq_group Q, P x :=
+begin
+  sorry,
+end 
+
+end conjugation_induction
+-/
 
 /-
 def pq_group_word_induction_pre (α : pq_group Q → Sort v) 
