@@ -1,7 +1,7 @@
 
 -- Very heavy inspiration from https://github.com/leanprover-community/mathlib/blob/master/src/algebra/quandle.lean
 
-import quandle
+import power_quandle
 import group_to_pq
 
 import algebra.group

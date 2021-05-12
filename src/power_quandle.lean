@@ -240,6 +240,28 @@ begin
     refl,
 end
 
+
+lemma pq_iso_inv_is_pq_morphism (f : Q1 ≃ Q2) (hf : is_pq_morphism f) : is_pq_morphism (f.symm) :=
+begin
+  split,
+  {
+      intros a b,
+      rw ←f.apply_symm_apply a,
+      rw ←f.apply_symm_apply b,
+      rw f.symm_apply_apply,
+      rw f.symm_apply_apply,
+      rw ←hf.1,
+      rw f.symm_apply_apply,
+  },
+  {
+      intros a n,
+      rw ←f.apply_symm_apply a,
+      rw ←hf.2,
+      rw f.symm_apply_apply,
+      rw f.symm_apply_apply,
+  },
+end
+
 end power_quandle_morphism
 
 

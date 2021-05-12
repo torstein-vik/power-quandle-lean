@@ -10,7 +10,7 @@ Note the main definition of power quandles is different compared to the one in t
 
 In rough order of when it appears in the paper:
 
-* quandle.lean contains the main definition of power quandles, and basic consequences.
+* power_quandle.lean contains the main definition of power quandles, and basic consequences.
 * group_to_pq.lean defines how a group is also a power quandle. It also contains that power quandle-isomorphic groups have group-isomorphic center quotient.
 * abelian_power_quandle.lean contains the definition of abelian power quandles as well as the theorem that a rhd b = b.
 * pq_to_group.lean defines the functor Gr : PowQdl -> Grp, and its adjointness. It also contains that Gr Pq (C_n) ~= C_n and that Gr Pq (C_2 x C_2) ~= (C_2)^3.

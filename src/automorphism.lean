@@ -1,5 +1,5 @@
 
-import quandle
+import power_quandle
 import group_to_pq
 
 import tactic

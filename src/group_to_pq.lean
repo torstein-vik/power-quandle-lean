@@ -1,7 +1,7 @@
 
 -- TODO: Define functor, ie. group morphism to pq morphism and comp
 
-import quandle
+import power_quandle
 
 import algebra.group
 import group_theory.quotient_group

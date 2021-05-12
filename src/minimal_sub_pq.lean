@@ -1,7 +1,6 @@
 
-import sub_pq
-import group_to_pq
 import pq_to_group
+import sub_pq
 
 universe u
 

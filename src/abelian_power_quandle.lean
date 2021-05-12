@@ -1,5 +1,5 @@
 
-import quandle
+import power_quandle
 
 universes u v w
 
