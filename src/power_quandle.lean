@@ -5,108 +5,162 @@ import tactic
 
 universes u v w
 
-class has_triangle_right (α : Type u) := (triangle_right : α → α → α)
-class has_triangle_left (α : Type u) := (triangle_left : α → α → α)
+class has_rhd (α : Type u) := (rhd : α → α → α)
+class has_lhd (α : Type u) := (lhd : α → α → α)
 
 reserve infixr `▷` :70
 reserve infixr `◁` :70
 
-infixr ▷ := has_triangle_right.triangle_right
-infixr ◁ := has_triangle_left.triangle_left
+infixr ▷ := has_rhd.rhd
+infixr ◁ := has_lhd.lhd
 
-class rack (R : Type u) extends has_triangle_left R, has_triangle_right R := 
-(right_dist : ∀ a b c : R, a ▷ (b ▷ c) = (a ▷ b) ▷ (a ▷ c))
-(left_dist : ∀ a b c : R, (c ◁ b) ◁ a = (c ◁ a) ◁ (b ◁ a))
-(right_inv : ∀ a b : R, (a ▷ b) ◁ a = b)
-(left_inv : ∀ a b : R, a ▷ (b ◁ a) = b)
+/-
+class rack (R : Type u) extends has_lhd R, has_rhd R := 
+(rhd_dist : ∀ a b c : R, a ▷ (b ▷ c) = (a ▷ b) ▷ (a ▷ c))
+(lhd_dist : ∀ a b c : R, (c ◁ b) ◁ a = (c ◁ a) ◁ (b ◁ a))
+(lhd_rhd : ∀ a b : R, (a ▷ b) ◁ a = b)
+(rhd_lhd : ∀ a b : R, a ▷ (b ◁ a) = b)
 
 class quandle (Q : Type u) extends rack Q := 
-(self_idem_right : ∀ a : Q, a ▷ a = a)
-(self_idem_left : ∀ a : Q, a ◁ a = a)
+(rhd_idem : ∀ a : Q, a ▷ a = a)
+(lhd_idem : ∀ a : Q, a ◁ a = a)
+-/
 
-class power_quandle (Q : Type u) extends quandle Q, has_pow Q int :=
-(pow_1 : ∀ a : Q, pow a 1 = a)
+class power_quandle (Q : Type u) extends has_rhd Q, has_pow Q int, has_one Q :=
+(rhd_dist : ∀ a b c : Q, a ▷ (b ▷ c) = (a ▷ b) ▷ (a ▷ c))
+(rhd_idem : ∀ a : Q, a ▷ a = a)
+(pow_one : ∀ a : Q, pow a 1 = a)
+(pow_zero : ∀ a : Q, pow a 0 = 1 )
 (pow_comp : ∀ a : Q, ∀ n m : int, (a^n)^m = a^(n * m))
-(q_pow0 : ∀ a b : Q, a ▷ (pow b 0) = pow b 0)
-(q_pown_right : ∀ a b : Q, ∀ n : int, (a ▷ b)^n = a ▷ (b^n))
---(q_pown_left : ∀ a b : Q, ∀ n : int, (b ◁ a)^n = (b^n) ◁ a)
---(q_powneg_right : ∀ a b : Q, a ▷ b = b ◁ (pow a (-1)))
-(q_powneg_left : ∀ a b : Q, b ◁ a = (pow a (-1)) ▷ b)
-(q_powadd : ∀ a b : Q, ∀ n m : int, (pow a n) ▷ ((pow a m) ▷ b) = (a^(n + m) ▷ b))
+(rhd_one : ∀ a : Q, a ▷ 1 = 1)
+(one_rhd : ∀ a : Q, 1 ▷ a = a)
+(pow_rhd : ∀ a b : Q, ∀ n : int, (a ▷ b)^n = a ▷ (b^n))
+(rhd_pow_add : ∀ a b : Q, ∀ n m : int, (pow a n) ▷ ((pow a m) ▷ b) = (a^(n + m) ▷ b))
 
 section power_quandle
 
 variables {Q : Type u} [power_quandle Q]
 
-theorem q_pown_left : ∀ a b : Q, ∀ n : int, (b ◁ a)^n = (b^n) ◁ a :=
-begin
-    intros a b n,
-    rw power_quandle.q_powneg_left,
-    rw power_quandle.q_pown_right,
-    rw ←power_quandle.q_powneg_left,
-end
+instance pq_has_lhd : has_lhd Q := ⟨λ x y, y ^ (-1 : ℤ) ▷ x⟩
 
-theorem q_powneg_right : ∀ a b : Q, a ▷ b = b ◁ (a ^ (-1 : int)) :=
+lemma lhd_rhd_pow : ∀ a b : Q, a ◁ b = b ^ (-1 : ℤ) ▷ a :=
 begin
     intros a b,
-    rw power_quandle.q_powneg_left,
-    rw power_quandle.pow_comp,
-    simp,
-    rw power_quandle.pow_1,
+    refl,
 end
 
-theorem q_powadd_left : ∀ a b : Q, ∀ n m : int, (b ◁ (a ^ m)) ◁ (a ^ n) = (b ◁ a^(n + m)) :=
+lemma lhd_dist : ∀ a b c : Q, (c ◁ b) ◁ a = (c ◁ a) ◁ (b ◁ a) :=
+begin
+    intros a b c,
+    repeat {rw lhd_rhd_pow},
+    rw power_quandle.pow_rhd,
+    rw power_quandle.rhd_dist,
+end
+
+lemma lhd_rhd : ∀ a b : Q, (a ▷ b) ◁ a = b :=
+begin
+    intros a b,
+    rw lhd_rhd_pow,
+    rw ←power_quandle.pow_one a,
+    rw power_quandle.pow_comp,
+    rw power_quandle.rhd_pow_add,
+    simp only [mul_one, mul_neg_eq_neg_mul_symm, add_left_neg],
+    rw power_quandle.pow_zero,
+    rw power_quandle.one_rhd,
+end
+
+lemma rhd_lhd : ∀ a b : Q, a ▷ (b ◁ a) = b :=
+begin
+    intros a b,
+    rw lhd_rhd_pow,
+    rw ←power_quandle.pow_one a,
+    rw power_quandle.pow_comp,
+    rw power_quandle.rhd_pow_add,
+    simp only [mul_one, mul_neg_eq_neg_mul_symm, add_right_neg],
+    rw power_quandle.pow_zero,
+    rw power_quandle.one_rhd,
+end
+
+lemma lhd_idem : ∀ a : Q, a ◁ a = a :=
+begin
+    intros a,
+    conv {
+        to_rhs,
+        rw ←lhd_rhd a a,
+    },
+    apply congr_arg (λ b, b ◁ a),
+    rw power_quandle.rhd_idem,
+end 
+
+lemma lhd_pow : ∀ a b : Q, ∀ n : int, (b ◁ a)^n = (b^n) ◁ a :=
+begin
+    intros a b n,
+    rw lhd_rhd_pow,
+    rw power_quandle.pow_rhd,
+    rw lhd_rhd_pow,
+end
+
+lemma rhd_lhd_pow : ∀ a b : Q, a ▷ b = b ◁ (a ^ (-1 : int)) :=
+begin
+    intros a b,
+    rw lhd_rhd_pow,
+    rw power_quandle.pow_comp,
+    simp,
+    rw power_quandle.pow_one,
+end
+
+lemma lhd_pow_add : ∀ a b : Q, ∀ n m : int, (b ◁ (a ^ m)) ◁ (a ^ n) = (b ◁ a^(n + m)) :=
 begin
     intros a b n m,
-    repeat {rw power_quandle.q_powneg_left},
+    repeat {rw lhd_rhd_pow},
     repeat {rw power_quandle.pow_comp},
-    rw power_quandle.q_powadd,
+    rw power_quandle.rhd_pow_add,
     simp,
     rw int.add_comm,
 end
 
-lemma pow_0_rhd : ∀ a b : Q, a ^ (0 : int) ▷ b = b :=
+lemma pq_one_pow : ∀ n : int, (1 : Q) ^ n = 1 :=
 begin
-    intros a b,
-    rw ←rack.left_inv a b,
-    rw ←power_quandle.pow_1 a,
+    intro n,
+    rw ←power_quandle.pow_zero (1 : Q),
     rw power_quandle.pow_comp,
-    rw power_quandle.q_powadd,
-    simp,
+    simp only [zero_mul],
 end
 
-lemma lhd_pow_0 : ∀ a b : Q, b ◁ a ^ (0 : int) = b :=
+lemma lhd_one : ∀ a : Q, a ◁ 1 = a :=
 begin
-    intros a b,
-    rw power_quandle.q_powneg_left,
-    rw power_quandle.pow_comp,
-    simp,
-    rw pow_0_rhd,
-end
+    intro a,
+    rw lhd_rhd_pow,
+    rw pq_one_pow,
+    rw power_quandle.one_rhd,
+end  
+
+lemma one_lhd : ∀ a : Q, 1 ◁ a = 1 :=
+begin
+    intro a,
+    rw lhd_rhd_pow,
+    rw power_quandle.rhd_one,
+end  
 
 lemma a_rhd_an : ∀ a : Q, ∀ n : int, a ▷ a ^ n = a ^ n :=
 begin
     intros a n,
-    rw ←power_quandle.q_pown_right,
-    rw quandle.self_idem_right,
+    rw ←power_quandle.pow_rhd,
+    rw power_quandle.rhd_idem,
 end
 
 lemma pow_neg_one_rhd_self : ∀ a : Q , a ^ (-1 : ℤ) ▷ a = a :=
 begin
     intro a,
-    rw ←power_quandle.q_powneg_left,
-    exact quandle.self_idem_left a,
+    rw ←lhd_rhd_pow,
+    exact lhd_idem a,
 end
 
 lemma a_inv_rhd_an : ∀ a : Q, ∀ n : int, a ^ (-1 : int) ▷ a ^ n = a ^ n :=
 begin
     intros a n,
-    rw q_powneg_right,
-    rw power_quandle.pow_comp,
-    simp,
-    rw power_quandle.pow_1,
-    rw ←q_pown_left,
-    rw quandle.self_idem_left,
+    rw ←power_quandle.pow_rhd,
+    rw pow_neg_one_rhd_self,
 end
 
 lemma an_rhd_am_nat : ∀ a : Q, ∀ n : nat, ∀ m : int, a ^ (n : int) ▷ a ^ m = a ^ m := 
@@ -119,19 +173,20 @@ begin
             refl,
         },
         rw int_zero,
-        rw pow_0_rhd,
+        rw power_quandle.pow_zero,
+        rw power_quandle.one_rhd,
     },
     {
         rw nat.succ_eq_add_one,
         rw ←int.of_nat_eq_coe,
         rw int.of_nat_add l 1,
-        rw ←power_quandle.q_powadd,
+        rw ←power_quandle.rhd_pow_add,
         have int_one : int.of_nat 1 = (1 : int),
         {
             refl,
         },
         rw int_one,
-        rw power_quandle.pow_1,
+        rw power_quandle.pow_one,
         rw a_rhd_an,
         assumption,
     },
@@ -155,7 +210,7 @@ begin
             rw int.of_nat_add,
             simp,
             rw int.add_comm (-1) (-1 + -↑l),
-            rw ←power_quandle.q_powadd,
+            rw ←power_quandle.rhd_pow_add,
             rw a_inv_rhd_an a m,
             rw int.neg_succ_of_nat_coe at hl,
             simp at hl,
@@ -179,11 +234,11 @@ def is_pq_morphism (f : Q1 → Q2) : Prop :=
 lemma lhd_preserved_by_morphism (f : Q1 → Q2) (hf : is_pq_morphism f) : ∀ a b : Q1, f(a ◁ b) = f(a) ◁ f(b) :=
 begin
     intros a b,
-    rw power_quandle.q_powneg_left,
+    rw lhd_rhd_pow,
     cases hf with hf1 hf2,
     rw hf1,
     rw hf2,
-    rw ←power_quandle.q_powneg_left,
+    rw ←lhd_rhd_pow,
 end
 
 lemma rhd_preserved_by_morphism (f : Q1 → Q2) (hf : is_pq_morphism f) : ∀ a b : Q1, f(a ▷ b) = f(a) ▷ f(b) :=
@@ -198,6 +253,14 @@ begin
     intros a n,
     cases hf with hf1 hf2,
     rw hf2,
+end
+
+lemma one_preserved_by_morphism (f : Q1 → Q2) (hf : is_pq_morphism f) : f 1 = 1 :=
+begin
+    rw ←power_quandle.pow_zero (1 : Q1),
+    cases hf with hf1 hf2,
+    rw hf2,
+    rw power_quandle.pow_zero,
 end
 
 lemma id_is_pq_morphism : is_pq_morphism (id : Q1 → Q1) :=
@@ -270,20 +333,18 @@ section power_quandle_product
 
 variables {Q1 : Type u} [power_quandle Q1] {Q2 : Type v} [power_quandle Q2]
 
-def triangle_right_product (x : Q1 × Q2) (y : Q1 × Q2) : (Q1 × Q2) := (x.1 ▷ y.1, x.2 ▷ y.2) 
-def triangle_left_product (x : Q1 × Q2) (y : Q1 × Q2) : (Q1 × Q2) := (x.1 ◁ y.1, x.2 ◁ y.2) 
+def rhd_product (x : Q1 × Q2) (y : Q1 × Q2) : (Q1 × Q2) := (x.1 ▷ y.1, x.2 ▷ y.2) 
 
-instance product_has_triangle_right : has_triangle_right (Q1 × Q2) := has_triangle_right.mk triangle_right_product
-instance product_has_triangle_left : has_triangle_left (Q1 × Q2) := has_triangle_left.mk triangle_left_product
+instance product_has_rhd : has_rhd (Q1 × Q2) := has_rhd.mk rhd_product
 
 lemma rhd_def_prod (a b : Q1 × Q2) : a ▷ b = (a.1 ▷ b.1, a.2 ▷ b.2) := rfl
-lemma lhd_def_prod (a b : Q1 × Q2) : a ◁ b = (a.1 ◁ b.1, a.2 ◁ b.2) := rfl
 
+/-
 lemma right_dist_product : ∀ a b c : Q1 × Q2, a ▷ (b ▷ c) = (a ▷ b) ▷ (a ▷ c) :=
 begin
    intros a b c, 
    repeat {rw rhd_def_prod},
-   repeat {rw ←rack.right_dist},
+   repeat {rw ←rack.rhd_dist},
 end
 
 
@@ -291,7 +352,7 @@ lemma left_dist_product : ∀ a b c : Q1 × Q2, (c ◁ b) ◁ a = (c ◁ a) ◁ 
 begin
    intros a b c, 
    repeat {rw lhd_def_prod},
-   repeat {rw ←rack.left_dist},
+   repeat {rw ←rack.lhd_dist},
 end
 
 
@@ -451,6 +512,77 @@ instance power_quandle_prod : power_quandle (Q1 × Q2) := power_quandle.mk
 (q_powneg_left_prod)
 (q_powadd_prod)
 
+-/
+
+
+def pq_pow_prod (a : Q1 × Q2) (n : int) : (Q1 × Q2) := (a.1 ^ n, a.2 ^ n)
+
+@[priority std.priority.default-1]
+instance product_pq_has_pow : has_pow (Q1 × Q2) int := ⟨pq_pow_prod⟩
+
+lemma pow_def_prod (a : Q1 × Q2) (n : int) : a ^ n = (a.1 ^ n, a.2 ^ n) := rfl
+
+
+instance : power_quandle (Q1 × Q2) := { 
+  rhd_dist := begin 
+    intros a b c,
+    simp only [rhd_def_prod, prod.mk.inj_iff],
+    split;
+    rw power_quandle.rhd_dist,
+  end,
+  rhd_idem := begin 
+    rintros ⟨a1, a2⟩,
+    simp only [rhd_def_prod, prod.mk.inj_iff],
+    split;
+    rw power_quandle.rhd_idem,
+  end,
+  pow_one := begin 
+    rintros ⟨a1, a2⟩,
+    simp only [pow_def_prod, prod.mk.inj_iff],
+    split;
+    rw power_quandle.pow_one,
+  end,
+  pow_zero := begin
+    rintros ⟨a1, a2⟩,
+    simp only [pow_def_prod, prod.mk_eq_one],
+    split;
+    rw power_quandle.pow_zero,
+  end,
+  pow_comp := begin 
+    rintros ⟨a1, a2⟩ n m,
+    simp only [pow_def_prod, prod.mk.inj_iff],
+    split;
+    rw power_quandle.pow_comp,
+  end,
+  rhd_one := begin 
+    rintros ⟨a1, a2⟩,
+    simp only [rhd_def_prod, prod.snd_one, prod.mk_eq_one, prod.fst_one],
+    split;
+    rw power_quandle.rhd_one,
+  end,
+  one_rhd :=  begin 
+    rintros ⟨a1, a2⟩,
+    simp only [rhd_def_prod, prod.mk.inj_iff, prod.snd_one, prod.fst_one],
+    split;
+    rw power_quandle.one_rhd,
+  end,
+  pow_rhd := begin 
+    rintros ⟨a1, a2⟩ ⟨b1, b2⟩ n,
+    simp only [rhd_def_prod, pow_def_prod, prod.mk.inj_iff],
+    split;
+    rw power_quandle.pow_rhd,
+  end,
+  rhd_pow_add := begin
+    rintros ⟨a1, a2⟩ ⟨b1, b2⟩ n m,
+    simp only [rhd_def_prod, pow_def_prod, prod.mk.inj_iff], 
+    split;
+    rw power_quandle.rhd_pow_add,
+  end,
+  ..product_has_rhd,
+  ..product_pq_has_pow,
+  ..prod.has_one }
+
+
 -- Universal property of product
 
 def pi1 (a : Q1 × Q2) : Q1 := a.1
@@ -533,14 +665,11 @@ end power_quandle_product
 
 section terminal_power_quandle
 
-def triangle_right_terminal (x : unit) (y : unit) : unit := unit.star 
-def triangle_left_terminal (x : unit) (y : unit) : unit := unit.star
+def rhd_terminal (x : unit) (y : unit) : unit := unit.star 
 
-instance terminal_has_triangle_right : has_triangle_right unit := has_triangle_right.mk triangle_right_terminal
-instance terminal_has_triangle_left : has_triangle_left unit := has_triangle_left.mk triangle_left_terminal
+instance terminal_has_rhd : has_rhd unit := has_rhd.mk rhd_terminal
 
 lemma rhd_def_term (a b : unit) : a ▷ b = unit.star := rfl
-lemma lhd_def_term (a b : unit) : a ◁ b = unit.star := rfl
 
 lemma unit_eq : ∀ a b : unit, a = b :=
 begin
@@ -550,6 +679,7 @@ begin
     refl,
 end
 
+/-
 instance terminal_rack : rack unit := rack.mk
 (begin intros, apply unit_eq end)
 (begin intros, apply unit_eq end)
@@ -559,6 +689,7 @@ instance terminal_rack : rack unit := rack.mk
 instance terminal_quandle : quandle unit := quandle.mk
 (begin intros, apply unit_eq end)
 (begin intros, apply unit_eq end)
+-/
 
 def terminal_pq_pow (a : unit) (n : int) : unit := unit.star
 
@@ -566,15 +697,25 @@ instance terminal_pow : has_pow unit int := has_pow.mk (terminal_pq_pow)
 
 lemma pow_def_term (a : unit) (n : int) : a ^ n = unit.star := rfl
 
-instance terminal_power_quandle : power_quandle unit := power_quandle.mk
-(begin intros, apply unit_eq end)
-(begin intros, apply unit_eq end)
-(begin intros, apply unit_eq end)
-(begin intros, apply unit_eq end)
---(begin intros, repeat {rw pow_def_term}, repeat {rw lhd_def_term} end)
---(begin intros, repeat {rw lhd_def_term}, rw all_are_star end)
-(begin intros, apply unit_eq end)
-(begin intros, apply unit_eq end)
+instance terminal_has_one : has_one unit := ⟨unit.star⟩
+
+lemma terminal_one_def (a : unit) : (1 : unit) = a := begin
+    apply unit_eq,
+end
+
+instance terminal_power_quandle : power_quandle unit := { 
+  rhd_dist := begin intros, apply unit_eq, end ,
+  rhd_idem := begin intros, apply unit_eq, end,
+  pow_one := begin intros, apply unit_eq, end,
+  pow_zero := begin intros, apply unit_eq, end,
+  pow_comp := begin intros, apply unit_eq, end,
+  rhd_one := begin intros, apply unit_eq, end,
+  one_rhd := begin intros, apply unit_eq, end,
+  pow_rhd := begin intros, apply unit_eq, end,
+  rhd_pow_add := begin intros, apply unit_eq, end,
+  ..terminal_pow,
+  ..terminal_has_rhd,
+  ..terminal_has_one, }
 
 
 -- Universal propery as terminal object
@@ -605,401 +746,45 @@ end
 
 end terminal_power_quandle
 
-section power_quandle_union
-
-variables {Q1 : Type u} [power_quandle Q1] {Q2 : Type v} [power_quandle Q2]
-
-def triangle_right_union : (Q1 ⊕ Q2) → (Q1 ⊕ Q2) → (Q1 ⊕ Q2)
-| (sum.inl x) (sum.inl y) := sum.inl (x ▷ y)
-| (sum.inl x) (sum.inr y) := sum.inr y
-| (sum.inr x) (sum.inl y) := sum.inl y
-| (sum.inr x) (sum.inr y) := sum.inr (x ▷ y)
-
-def triangle_left_union : (Q1 ⊕ Q2) → (Q1 ⊕ Q2) → (Q1 ⊕ Q2)
-| (sum.inl x) (sum.inl y) := sum.inl (x ◁ y)
-| (sum.inl x) (sum.inr y) := sum.inl x
-| (sum.inr x) (sum.inl y) := sum.inr x
-| (sum.inr x) (sum.inr y) := sum.inr (x ◁ y)
-
-instance union_has_triangle_right : has_triangle_right (Q1 ⊕ Q2) := has_triangle_right.mk triangle_right_union
-instance union_has_triangle_left : has_triangle_left (Q1 ⊕ Q2) := has_triangle_left.mk triangle_left_union
-
-@[simp] lemma rhd_def_union_ll (a b : Q1) : (sum.inl a : Q1 ⊕ Q2) ▷ (sum.inl b) = sum.inl (a ▷ b) := rfl
-@[simp] lemma rhd_def_union_rr (a b : Q2) : (sum.inr a : Q1 ⊕ Q2) ▷ (sum.inr b) = sum.inr (a ▷ b) := rfl
-@[simp] lemma rhd_def_union_lr (a : Q1) (b : Q2) : (sum.inl a) ▷ (sum.inr b) = sum.inr (b) := rfl
-@[simp] lemma rhd_def_union_rl (a : Q2) (b : Q1) : (sum.inr a) ▷ (sum.inl b) = sum.inl (b) := rfl
-
-@[simp] lemma lhd_def_union_ll (a b : Q1) : (sum.inl a : Q1 ⊕ Q2) ◁ (sum.inl b) = sum.inl (a ◁ b) := rfl
-@[simp] lemma lhd_def_union_rr (a b : Q2) : (sum.inr a : Q1 ⊕ Q2) ◁ (sum.inr b) = sum.inr (a ◁ b) := rfl
-@[simp] lemma lhd_def_union_lr (a : Q1) (b : Q2) : (sum.inl a) ◁ (sum.inr b) = sum.inl (a) := rfl
-@[simp] lemma lhd_def_union_rl (a : Q2) (b : Q1) : (sum.inr a) ◁ (sum.inl b) = sum.inr (a) := rfl
-
-def pq_pow_union : (Q1 ⊕ Q2) → int → (Q1 ⊕ Q2)
-| (sum.inl a) n := sum.inl (a ^ n)
-| (sum.inr a) n := sum.inr (a ^ n)
-
-instance union_pq_has_pow : has_pow (Q1 ⊕ Q2) int := ⟨pq_pow_union⟩
-
-@[simp] lemma pow_def_union_l (a : Q1) (n : int) : (sum.inl a : Q1 ⊕ Q2) ^ n = sum.inl (a ^ n) := rfl
-@[simp] lemma pow_def_union_r (a : Q2) (n : int) : (sum.inr a : Q1 ⊕ Q2) ^ n = sum.inr (a ^ n) := rfl
-
-
-lemma pow_1_union : ∀ a : Q1 ⊕ Q2, a ^ (1 : int) = a :=
-begin
-    intro a,
-    induction a with a1 a2,
-    {
-        simp,
-        rw power_quandle.pow_1,
-    },
-    {
-        simp,
-        rw power_quandle.pow_1,
-    },
-end
-
-
-lemma pow_comp_union : ∀ a : Q1 ⊕ Q2, ∀ n m : int, (a^n)^m = a^(n * m) :=
-begin
-    intros a n m,
-    induction a with a1 a2,
-    {
-        simp,
-        rw power_quandle.pow_comp,
-    },
-    {
-        simp,
-        rw power_quandle.pow_comp,
-    },
-end
-
-
-lemma q_pow0_union : ∀ a b : Q1 ⊕ Q2, a ▷ (b ^ (0 : int)) = b ^ (0 : int) :=
-begin
-    intros a b,
-    induction a with a1 a2,
-    {
-        induction b with b1 b2,
-        {
-            simp,
-            rw power_quandle.q_pow0,
-        },
-        {
-            simp,
-        },
-    },
-    {
-        induction b with b1 b2,
-        {
-            simp,
-        },
-        {
-            simp,
-            rw power_quandle.q_pow0,
-        },
-    },
-end
-
-
-lemma q_pown_right_union : ∀ a b : Q1 ⊕ Q2, ∀ n : int, (a ▷ b)^n = a ▷ (b^n) :=
-begin
-    intros a b n,
-    induction a with a1 a2,
-    {
-        induction b with b1 b2,
-        {
-            simp,
-            rw power_quandle.q_pown_right,
-        },
-        {
-            simp,
-        },
-    },
-    {
-        induction b with b1 b2,
-        {
-            simp,
-        },
-        {
-            simp,
-            rw power_quandle.q_pown_right,
-        },
-    },
-end
-
-lemma q_powneg_left_union : ∀ a b : Q1 ⊕ Q2, b ◁ a = (a ^ (-1 : int)) ▷ b :=
-begin
-    intros a b,
-    induction a with a1 a2,
-    {
-        induction b with b1 b2,
-        {
-            simp,
-            rw power_quandle.q_powneg_left,
-        },
-        {
-            simp,
-        },
-    },
-    {
-        induction b with b1 b2,
-        {
-            simp,
-        },
-        {
-            simp,
-            rw power_quandle.q_powneg_left,
-        },
-    },
-end
-
-
-lemma q_powadd_union : ∀ a b : Q1 ⊕ Q2, ∀ n m : int, (pow a n) ▷ ((pow a m) ▷ b) = (a^(n + m) ▷ b) :=
-begin
-    intros a b n m,
-    induction a with a1 a2,
-    {
-        induction b with b1 b2,
-        {
-            simp,
-            rw power_quandle.q_powadd,
-        },
-        {
-            simp,
-        },
-    },
-    {
-        induction b with b1 b2,
-        {
-            simp,
-        },
-        {
-            simp,
-            rw power_quandle.q_powadd,
-        },
-    },
-end
-
-
-lemma right_dist_union : ∀ a b c : Q1 ⊕ Q2, a ▷ (b ▷ c) = (a ▷ b) ▷ (a ▷ c) :=
-begin
-    intros a b c,
-    induction a with a1 a2,
-    {
-        induction b with b1 b2,
-        {
-            induction c with c1 c2,
-            {
-                simp,
-                rw rack.right_dist,
-            },
-            {
-                simp,
-            },
-        },
-        {
-            induction c with c1 c2,
-            {
-                simp,
-            },
-            {
-                simp,
-            },
-        },
-    },
-    {
-        induction b with b1 b2,
-        {
-            induction c with c1 c2,
-            {
-                simp,
-            },
-            {
-                simp,
-            },
-        },
-        {
-            induction c with c1 c2,
-            {
-                simp,
-            },
-            {
-                simp,
-                rw rack.right_dist,
-            },
-        },
-    },
-end
-
-
-lemma left_dist_union : ∀ a b c : Q1 ⊕ Q2, (c ◁ b) ◁ a = (c ◁ a) ◁ (b ◁ a) :=
-begin
-    intros a b c,
-    repeat {rw q_powneg_left_union},
-    rw q_pown_right_union,
-    apply right_dist_union,
-end
-
-
-lemma right_inv_union : ∀ a b : Q1 ⊕ Q2, (a ▷ b) ◁ a = b :=
-begin
-    intros a b,
-    induction a with a1 a2,
-    {
-        induction b with b1 b2,
-        {
-            simp,
-            rw rack.right_inv,
-        },
-        {
-            simp,
-        },
-    },
-    {
-        induction b with b1 b2,
-        {
-            simp,
-        },
-        {
-            simp,
-            rw rack.right_inv,
-        },
-    },
-end
-
-
-lemma left_inv_union : ∀ a b : Q1 ⊕ Q2, a ▷ (b ◁ a) = b :=
-begin
-    intros a b,
-    rw q_powneg_left_union,
-    have right_inv_aux := right_inv_union (a ^ (-1 : int)) b,
-    rw q_powneg_left_union at right_inv_aux,
-    rw pow_comp_union at right_inv_aux,
-    simp at right_inv_aux,
-    rw pow_1_union at right_inv_aux,
-    exact right_inv_aux,
-end
-
-
-instance union_rack : rack (Q1 ⊕ Q2) := rack.mk
-(right_dist_union)
-(left_dist_union)
-(right_inv_union)
-(left_inv_union)
-
-
-lemma self_idem_right_union : ∀ a : Q1 ⊕ Q2, a ▷ a = a :=
-begin
-    intro a,
-    induction a with a1 a2,
-    {
-        simp,
-        rw quandle.self_idem_right,
-    },
-    {
-        simp,
-        rw quandle.self_idem_right,
-    },
-end
-
-
-lemma self_idem_left_union : ∀ a : Q1 ⊕ Q2, a ◁ a = a :=
-begin
-    intro a,
-    induction a with a1 a2,
-    {
-        simp,
-        rw quandle.self_idem_left,
-    },
-    {
-        simp,
-        rw quandle.self_idem_left,
-    },
-end
-
-
-instance union_quandle : quandle (Q1 ⊕ Q2) := quandle.mk
-(self_idem_right_union)
-(self_idem_left_union)
-
-
-instance union_power_quandle : power_quandle (Q1 ⊕ Q2) := power_quandle.mk
-(pow_1_union)
-(pow_comp_union)
-(q_pow0_union)
-(q_pown_right_union)
-(q_powneg_left_union)
-(q_powadd_union)
-
-
-
-
-end power_quandle_union
 
 section initial_power_quandle
 
-
-def triangle_right_initial : empty → empty → empty := λ a, id
-def triangle_left_initial : empty → empty → empty := λ a _, a
-
-instance initial_has_triangle_right : has_triangle_right empty := has_triangle_right.mk triangle_right_initial
-instance initial_has_triangle_left : has_triangle_left empty := has_triangle_left.mk triangle_left_initial
-
-lemma rhd_def_init (a : empty) (b : empty) : a ▷ b = b := rfl
-lemma lhd_def_init (a : empty) (b : empty) : b ◁ a = b := rfl
-
-instance initial_rack : rack empty := rack.mk
-(begin intros, trivial, end)
-(begin intros, trivial, end)
-(begin intros, trivial, end)
-(begin intros, trivial, end)
-
-instance initial_quandle : quandle empty := quandle.mk
-(begin intros, trivial, end)
-(begin intros, trivial, end)
-
-def initial_pq_pow (a : empty) (n : int) : empty := a
-
-instance initial_pow : has_pow empty int := has_pow.mk (initial_pq_pow)
-
-instance initial_power_quandle : power_quandle empty := power_quandle.mk
-(begin intros, trivial, end)
-(begin intros, trivial, end)
-(begin intros, trivial, end)
-(begin intros, trivial, end)
-(begin intros, trivial, end)
-(begin intros, trivial, end)
 
 -- Proof that it is intial in the category of power quandles
 
 
 variables {Q : Type u} [power_quandle Q]
 
-def initial_morphism (a : empty) : Q := begin
-    induction a,
-end
+def initial_morphism (a : unit) : Q := 1
 
-lemma initial_morphism_is_morphism : is_pq_morphism (initial_morphism : (empty → Q)) :=
+lemma initial_morphism_def (a : unit) : initial_morphism a = (1 : Q) := rfl
+
+lemma initial_morphism_is_morphism : is_pq_morphism (initial_morphism : (unit → Q)) :=
 begin
     split,
     {
         intros a b,
-        induction a,
+        simp only [initial_morphism_def, power_quandle.rhd_one],
     },
     {
         intros a n,
-        induction a,
+        simp only [initial_morphism_def, pq_one_pow],
     },
 end
 
-theorem initial_pq_is_initial (f : empty → Q) (hf : is_pq_morphism f) : f = initial_morphism :=
+theorem initial_pq_is_initial (f : unit → Q) (hf : is_pq_morphism f) : f = initial_morphism :=
 begin
     apply funext,
     intro a,
     induction a,
+    rw initial_morphism_def,
+    rw ←terminal_one_def punit.star,
+    rw one_preserved_by_morphism f hf,
 end
 
 end initial_power_quandle
+
+
 
 
 
