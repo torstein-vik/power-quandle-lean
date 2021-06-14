@@ -539,7 +539,7 @@ def f_on_C2_fun : pq_group K → C2 := quotient.lift f_pre_on_C2_fun (begin
         unfold f_pre_on_C2_fun,
         simp only [mul_comm, inv_mul_cancel_left],
         congr',
-        simp only [rhd_def, mul_comm, inv_mul_cancel_left],
+        simp only [rhd_def_group, mul_comm, inv_mul_cancel_left],
     },
     {
         unfold f_pre_on_C2_fun,
