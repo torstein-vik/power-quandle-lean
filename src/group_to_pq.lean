@@ -38,6 +38,34 @@ begin
   group,
 end
 
+
+lemma center_reformulate (a b : Q) : (a * b = b * a) ↔ (a * b * a⁻¹ = b) :=
+begin
+    split,
+    intro hab, rw hab, group,
+    intro hab, rw ←hab, simp, rw hab,
+end
+
+lemma center_reformulate_inv (a b : Q) : (a * b⁻¹ = b⁻¹ * a) ↔ (a * b * a⁻¹ = b) :=
+begin
+    split,
+    {
+        intro hab,
+        refine inv_inj.mp _,
+        simp,
+        rw hab,
+        simp,
+    },
+    {
+        intro hab,
+        rw ←hab,
+        simp, 
+        refine inv_inj.mp _,
+        simp,
+        exact hab,
+    },
+end
+
 instance group_is_power_quandle : power_quandle Q := {
   rhd_dist := begin 
     intros a b c,

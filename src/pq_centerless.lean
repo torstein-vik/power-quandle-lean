@@ -137,32 +137,6 @@ def group_morphism_mod_center (f : G → H) (hf : is_pq_morphism f) (hfs : funct
 
 
 
-lemma center_reformulate (a b : G) : (a * b = b * a) ↔ (a * b * a⁻¹ = b) :=
-begin
-    split,
-    intro hab, rw hab, group,
-    intro hab, rw ←hab, simp, rw hab,
-end
-
-lemma center_reformulate_inv (a b : G) : (a * b⁻¹ = b⁻¹ * a) ↔ (a * b * a⁻¹ = b) :=
-begin
-    split,
-    {
-        intro hab,
-        refine inv_inj.mp _,
-        simp,
-        rw hab,
-        simp,
-    },
-    {
-        intro hab,
-        rw ←hab,
-        simp, 
-        refine inv_inj.mp _,
-        simp,
-        exact hab,
-    },
-end
 
 
 theorem group_morph_ker_eq_center (f : G → H) (hf : is_pq_morphism f) (hfs : function.surjective f) (hfi : function.injective f) : (monoid_hom.ker (group_morphism_mod_center f hf hfs)) = subgroup.center G :=
