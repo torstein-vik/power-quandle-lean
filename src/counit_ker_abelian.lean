@@ -9,27 +9,6 @@ section counit_ker_abelian
 
 variables {G : Type u} [group G]
 
-lemma rhd_mul : ∀ x y z : G, x ▷ (y * z) = (x ▷ y) * (x ▷ z) :=
-begin
-  intros x y z,
-  repeat {rw rhd_def},
-  group,
-end
-
-lemma rhd_inv : ∀ x y : G, x ▷ y⁻¹ = (x ▷ y)⁻¹ :=
-begin
-  intros x y,
-  repeat {rw ←gpow_neg_one},
-  rw power_quandle.q_pown_right,
-end 
-
-lemma rhd_one : ∀ x : G, x ▷ 1 = 1 :=
-begin
-  intro x,
-  have one_eq_one_pow_zero : (1 : G) = (1 : G) ^ (0 : ℤ) := rfl,
-  rw one_eq_one_pow_zero,
-  rw power_quandle.q_pow0 x (1 : G),
-end
 
 lemma of_inv : ∀ x : G, of (x⁻¹) = (of x)⁻¹ :=
 begin
@@ -63,11 +42,11 @@ begin
       rw counit_mul,
       rw ←mul_def,
       
-      rw mul_rhd_eq_rhd,
+      rw mul_rhd,
       rw x_ih_b,
       rw x_ih_a,
 
-      rw ←mul_rhd_eq_rhd,
+      rw ←mul_rhd,
       
 
       induction y,
@@ -76,12 +55,12 @@ begin
         induction y,
         {
           rw ←unit_def,
-          repeat {rw rhd_one},
+          repeat {rw power_quandle.rhd_one},
         },
         {
           repeat {rw ←of_def at *},
-          rw rhd_def,
-          rw rhd_def,
+          rw rhd_def_group,
+          rw rhd_def_group,
           have halg_rw_1 : ∀ a b c : pq_group G, a*b*c*(a*b)⁻¹ = a*(b*c*b⁻¹)*a⁻¹,
           {
             intros a b c,
@@ -89,7 +68,7 @@ begin
           },
           rw halg_rw_1,
           repeat {rw rhd_eq_conj},
-          rw mul_rhd_eq_rhd,
+          rw mul_rhd,
         },
         {
           rw ←mul_def,
@@ -121,17 +100,17 @@ begin
       intro y,
       rw ←inv_def,
       have hx := x_ih (⟦x_a⟧⁻¹▷y),
-      rw ←mul_rhd_eq_rhd at hx,
+      rw ←mul_rhd at hx,
       simp only [mul_right_inv] at hx,
-      rw one_rhd at hx,
+      rw power_quandle.one_rhd at hx,
       --rw hx,
       rw monoid_hom.map_inv,
       rw of_inv,
       rw hx,
-      rw ←mul_rhd_eq_rhd ((of _) ⁻¹),
+      rw ←mul_rhd ((of _) ⁻¹),
       simp only [mul_left_inv],
       rw ←hx,
-      rw one_rhd,
+      rw power_quandle.one_rhd,
     }
   },
   {intro y, refl,},
@@ -144,12 +123,12 @@ begin
   cases a with a ha,
   simp only [subtype.coe_mk],
   rw center_reformulate,
-  rw ←rhd_def,
+  rw ←rhd_def_group,
   rw inner_aut_eq,
   have ha1 : counit a = 1 := ha,
   rw ha1,
   rw of_1_eq_unit,
-  rw one_rhd,
+  rw power_quandle.one_rhd,
 end
 
 theorem counit_ker_sub_center : ((counit : pq_group G →* G).ker) ≤ subgroup.center (pq_group G) :=
@@ -172,7 +151,7 @@ end
 lemma counit_ker_rhd : ∀ a b : ((counit : pq_group G →* G).ker), a ▷ b = b :=
 begin 
   intros a b,
-  rw rhd_def,
+  rw rhd_def_group,
   rw counit_ker_abelian,
   group,
 end
@@ -238,12 +217,6 @@ def φ' : G × G → kerc G := λ ⟨x, y⟩, ⟨of x * of y * (of (x*y))⁻¹, 
 end⟩ 
 
 
-lemma rhd_of (a b : G) : of a ▷ of b = of (a ▷ b) :=
-begin
-  rw rhd_def,
-  rw rhd_eq_conj,
-end
-
 theorem φ'_is_cocycle : ∀ g h k : G, φ'(g, h) * φ'(g * h, k) = φ'(g, h * k) * φ'(h ,k) :=
 begin
   intros g h k,
@@ -257,14 +230,14 @@ begin
   },
   rw alg_rw,
   clear alg_rw,
-  rw ←rhd_def,
-  rw ←rhd_def,
-  rw ←rhd_def,
+  rw ←rhd_def_group,
+  rw ←rhd_def_group,
+  rw ←rhd_def_group,
   rw ←mul_assoc g h k,
   group,
   rw ←of_pow_eq_pow_of,
-  repeat {rw rhd_of},
-  repeat {rw rhd_def},
+  repeat {rw rhd_of_eq_of_rhd},
+  repeat {rw rhd_def_group},
   group,
 end
  
@@ -367,4 +340,4 @@ begin
   }
 end
 
-variables {H : Type v} [group H]
+end center_LR_morph
