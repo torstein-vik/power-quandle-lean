@@ -328,6 +328,54 @@ end
 end power_quandle_morphism
 
 
+section power_quandle_rhd_map
+
+variables {Q : Type u} [power_quandle Q]
+
+def rhd_map (x : Q) : Q → Q := λ y, x ▷ y
+
+lemma rhd_map_def (x : Q) (y : Q) : rhd_map x y = x ▷ y := rfl
+
+lemma rhd_map_is_pq_morphism (x : Q) : is_pq_morphism (rhd_map x) :=
+begin
+  split,
+  {
+    intros a b,
+    simp only [rhd_map_def],
+    apply power_quandle.rhd_dist,
+  },
+  {
+    intros a n,
+    simp only [rhd_map_def],
+    apply eq.symm,
+    apply power_quandle.pow_rhd,
+  },
+end
+
+lemma rhd_map_is_injective (x : Q) : function.injective (rhd_map x) :=
+begin
+  intros a b hab,
+  have hab1 := congr_arg (λ y, y ◁ x) hab,
+  simp only [rhd_map_def, lhd_rhd] at hab1,
+  exact hab1,
+end
+
+lemma rhd_map_is_surjective (x : Q) : function.surjective (rhd_map x) :=
+begin
+  intros a,
+  use (a ◁ x),
+  simp only [rhd_map_def, rhd_lhd],
+end
+
+lemma rhd_map_is_bijective (x : Q) : function.bijective (rhd_map x) :=
+begin
+  split,
+  apply rhd_map_is_injective,
+  apply rhd_map_is_surjective,
+end
+
+end power_quandle_rhd_map
+
 
 section power_quandle_product
 
