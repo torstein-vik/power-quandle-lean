@@ -1,5 +1,5 @@
 
-import pq_induce_lhd
+import power_quandle
 
 universe u
 
@@ -111,6 +111,7 @@ lemma free_pq_rhd_def (x y : pre_free_pq S) : ⟦rhd x y⟧ = (⟦x⟧ ▷ ⟦y�
 
 lemma free_pq_pow_def (x : pre_free_pq S) (n : ℤ) : ⟦pow x n⟧ = (⟦x⟧ ^ n : free_pq S) := rfl
 
+lemma free_pq_one_def : ⟦(unit : pre_free_pq S)⟧ = (1 : free_pq S) := rfl
 
 lemma quot_mk_helper_free_pq (a : pre_free_pq S) : quot.mk setoid.r a = ⟦a⟧ := rfl
 
