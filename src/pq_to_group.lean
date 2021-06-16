@@ -142,7 +142,6 @@ begin
     exact (pre_pq_group_rel'.pow_succ a n).rel
 end
 
-
 lemma pow_zero_eq_unit : ∀ a : Q, of (a ^ (0 : int)) = 1 :=
 begin
     intro a,
@@ -150,6 +149,12 @@ begin
     exact (pre_pq_group_rel'.pow_zero a).rel
 end 
 
+lemma of_one : of (1 : Q) = 1 :=
+begin
+    rw ←pow_zero_eq_unit (1 : Q),
+    apply congr_arg,
+    rw power_quandle.pow_zero,
+end
 
 lemma of_pow_eq_pow_of : ∀ a : Q, ∀ n : int, of (a ^ n) = (of a) ^ n :=
 begin
