@@ -1,12 +1,14 @@
 
 import pq_induction_principles
 import minimal_sub_pq_gen_group
-
+import sub_pq_normal
+import pq_like
 
 universe u
 
 section pq_like_equalizer
 
+-- Idea: Eq(eta, L(eta)) is normal. Useful for proving injectivity?
 
 variables {Q : Type u} [power_quandle Q]
 
@@ -16,9 +18,9 @@ def eta_equalizer (Q : Type u) [power_quandle Q] : sub_power_quandle (pq_group Q
     intros x y hx hy,
     rw set.mem_def at *,
     rw ←rhd_of_eq_of_rhd,
-    rw rhd_def x y,
+    rw rhd_def_group x y,
     simp only [monoid_hom.map_mul, monoid_hom.map_mul_inv],
-    rw ←rhd_def,
+    rw ←rhd_def_group,
     apply congr_arg2,
     assumption,
     assumption,
@@ -29,8 +31,34 @@ def eta_equalizer (Q : Type u) [power_quandle Q] : sub_power_quandle (pq_group Q
     rw of_pow_eq_pow_of,
     rw monoid_hom.map_gpow,
     rw hx,
+  end,
+  closed_one := begin
+    rw set.mem_def,
+    rw of_one,
+    simp only [monoid_hom.map_one],
   end }
 
+lemma eta_equalizer_normal : sub_pq_normal (eta_equalizer Q) :=
+begin
+  intros x y,
+  cases y with y hy,
+  simp only [subtype.coe_mk],
+  show of (x ▷ y) = (L_of_morph of of_is_pq_morphism) (x ▷ y),
+  have hy1 : of (y) = (L_of_morph of of_is_pq_morphism) (y) := hy,
+  rw ←rhd_of_eq_of_rhd,
+  conv {
+    to_rhs,
+    rw rhd_def_group,
+  },
+  simp only [monoid_hom.map_mul, monoid_hom.map_mul_inv],
+  rw ←rhd_def_group,
+  rw ←hy1,
+  conv {
+    to_rhs,
+    rw inner_aut_eq,
+  },
+  rw counit_L_of,
+end
 
 def eta_equalizer_iso_forward : pq_group (eta_equalizer Q) →* pq_group Q :=
 begin
