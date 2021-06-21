@@ -64,7 +64,7 @@ begin
         simp only [id.def, function.comp_app],
         rw power_quandle.pow_comp,
         norm_num,
-        rw power_quandle.pow_1,
+        rw power_quandle.pow_one,
       },
       rw comp_is_id,
       simp only [function.comp.right_id],
@@ -123,6 +123,49 @@ begin
 end
 
 end word_induction
+
+
+section cleaned_induction
+
+variables {Q : Type u} [power_quandle Q]
+
+theorem pq_group_induction {P : pq_group Q → Prop}
+(hof : ∀ q : Q, P (of q))
+(hmul : ∀ a b : pq_group Q, P a → P b → P (a * b))
+(hinv : ∀ a : pq_group Q, P a → P (a⁻¹))
+: ∀ x : pq_group Q, P x :=
+begin
+  intro x,
+  induction x,
+  {
+    rw quot_mk_helper,
+    induction x,
+    {
+      rw incl_unit_eq_unit,
+      convert hof 1,
+      rw of_one,
+    },
+    {
+      rw ←of_def,
+      apply hof,
+    },
+    {
+      rw ←mul_def,
+      apply hmul,
+      assumption,
+      assumption,
+    },
+    {
+      rw ←inv_def,
+      apply hinv,
+      assumption,
+    },
+  },
+  {refl,},
+end
+
+end cleaned_induction
+
 
 section morphism_equality
 
