@@ -39,6 +39,21 @@ lemma spq_pow_def (a : Q) (n : ℤ) (ha : a ∈ Q1.carrier) : (⟨a, ha⟩ ^ n :
 
 lemma spq_one_def : (1 : Q1) = ⟨1, Q1.closed_one⟩ := rfl
 
+lemma coe_rhd (a b : Q1) : (↑a : Q) ▷ (↑b) = ↑(a ▷ b) := 
+begin
+  cases a with a ha,
+  cases b with b hb,
+  refl,
+end
+
+lemma coe_pow (a : Q1) (n : ℤ) : (↑a : Q) ^ n = ↑(a ^ n) := 
+begin
+  cases a with a ha,
+  refl,
+end
+
+lemma coe_one : (↑(1 : Q1) : Q) = 1 := rfl
+
 instance sub_power_quandle_is_pq : power_quandle Q1 := { 
   rhd_dist := begin 
     rintros ⟨a, ha⟩ ⟨b, hb⟩ ⟨c, hc⟩,
