@@ -197,6 +197,12 @@ begin
     },
 end
 
+lemma of_inv (a : Q) : (of a)⁻¹ = of (a ^ (-1 : ℤ)) :=
+begin
+    rw of_pow_eq_pow_of,
+    simp only [gpow_one, gpow_neg],
+end
+
 variables {QG : Type u} {QH : Type v} [power_quandle QG] [power_quandle QH]
 
 lemma of_is_pq_morphism : is_pq_morphism (of : QH → pq_group QH) :=
