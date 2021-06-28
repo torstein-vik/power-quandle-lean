@@ -378,3 +378,112 @@ instance pq_union_is_pq : power_quandle (pq_union Q1 Q2) := {
 
 
 end power_quandle_union_pq
+
+section pq_union_map
+
+variables {Q1 : Type u} [power_quandle Q1] {Q2 : Type v} [power_quandle Q2]
+
+variables {X : Type*} [power_quandle X]
+
+def pq_union_map_to (f : X → Q1 ⊕ Q2) : X → pq_union Q1 Q2 := λ x, ⟦f x⟧
+
+theorem pq_union_map_to_is_pq_morphism (f : X → Q1 ⊕ Q2) (hf1 : ∀ x y : X, f (x ▷ y) = pre_pq_union_rhd (f x) (f y)) (hf2 : ∀ x : X, ∀ n : ℤ, f (x ^ n) = pre_pq_union_pow (f x) n) : is_pq_morphism (pq_union_map_to f) :=
+begin
+  split,
+  {
+    intros x y,
+    specialize hf1 x y,
+    unfold pq_union_map_to,
+    rw hf1,
+    refl,
+  },
+  {
+    intros x n,
+    specialize hf2 x n,
+    unfold pq_union_map_to,
+    rw hf2,
+    refl,
+  },
+end
+
+def pq_union_map_from_pre (f1 : Q1 → X) (f2 : Q2 → X) (hf : f1 1 = f2 1) : pq_union Q1 Q2 → X := λ x, quotient.lift_on x (sum.elim f1 f2) begin 
+  intros a b hab,
+  cases hab,
+  cases hab_hxy,
+  {
+    refl,
+  },
+  {
+    simp only [sum.elim_inl, sum.elim_inr, hf],
+  },
+  {
+    simp only [sum.elim_inl, sum.elim_inr, hf],
+  },
+end
+
+def pq_union_map_from (f1 : Q1 → X) (hf1 : is_pq_morphism f1) (f2 : Q2 → X) (hf2 : is_pq_morphism f2) : pq_union Q1 Q2 → X := pq_union_map_from_pre f1 f2 begin 
+  rw one_preserved_by_morphism f1,
+  rw one_preserved_by_morphism f2,
+  assumption,
+  assumption,
+end
+
+theorem pq_union_map_from_is_pq_morphism (f1 : Q1 → X) (hf1 : is_pq_morphism f1) (f2 : Q2 → X) (hf2 : is_pq_morphism f2) (hf12 : ∀ a : Q1, ∀ b : Q2, f1 a ▷ f2 b = f2 b) (hf21 : ∀ a : Q2, ∀ b : Q1, f2 a ▷ f1 b = f1 b) : is_pq_morphism (pq_union_map_from f1 hf1 f2 hf2) :=
+begin
+  split,
+  {
+    intros a b,
+    unfold pq_union_map_from,
+    unfold pq_union_map_from_pre,
+    induction a,
+    induction b,
+    {
+      simp only [quot_mk_helper_pq_union],
+      rw pq_union_rhd_def,
+      unfold pq_union_rhd,
+      simp only [quotient.lift_on_beta, quotient.lift_on_beta₂],
+      cases a;
+      cases b;
+      unfold pre_pq_union_rhd;
+      simp only [sum.elim_inl, sum.elim_inr],
+      {
+        rw hf1.1,
+      },
+      {
+        rw hf12,
+      },
+      {
+        rw hf21,
+      },
+      {
+        rw hf2.1,
+      },
+    },
+    {refl,},
+    {refl,},
+  },
+  {
+    intros a n,
+    unfold pq_union_map_from,
+    unfold pq_union_map_from_pre,
+    induction a,
+    {
+      simp only [quot_mk_helper_pq_union],
+      rw pq_union_pow_def,
+      unfold pq_union_pow,
+      simp only [quotient.lift_on_beta],
+      cases a;
+      unfold pre_pq_union_pow;
+      simp only [sum.elim_inl, sum.elim_inr],
+      {
+        rw hf1.2,
+      },
+      {
+        rw hf2.2,
+      },
+    },
+    {refl,},
+  },
+end
+
+end pq_union_map
