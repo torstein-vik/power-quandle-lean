@@ -21,9 +21,9 @@ begin
     rw ←rhd_of_eq_of_rhd,
     repeat {rw ←hf},
     rw ←rhd_of_eq_of_rhd,
-    rw rhd_def,
+    rw rhd_def_group,
     simp only [monoid_hom.map_mul, monoid_hom.map_mul_inv],
-    rw rhd_def,
+    rw rhd_def_group,
   },
   {
     intros a n,

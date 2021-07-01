@@ -19,7 +19,7 @@ begin
   {
     simp only [list.prod_cons, list.map],
     simp only [function.comp_app, list.prod_cons, list.map] at hx,
-    have hx1 := congr_arg (L_of_morph (gen_set_counit gen) (functoriality_group_bundled_to_pq (gen_set_counit gen))) hx,
+    have hx1 := congr_arg (L_of_morph (gen_set_counit gen) (functoriality_group_to_pq (gen_set_counit gen))) hx,
     simp only [monoid_hom.map_mul, L_of_morph_of, gen_set_counit_of] at hx1,
     sorry,
   },
@@ -49,9 +49,10 @@ begin
         simp only [list.prod_nil, list.map],
         sorry,
       },
-      have hx1 := congr_arg (L_of_morph (gen_set_counit gen) (functoriality_group_bundled_to_pq (gen_set_counit gen))) hx,
+      have hx1 := congr_arg (L_of_morph (gen_set_counit gen) (functoriality_group_to_pq (gen_set_counit gen))) hx,
       simp only [monoid_hom.map_mul, list.prod_cons, list.map, L_of_morph_of, gen_set_counit_of] at hx1,
       simp only [list.prod_cons, list.map],
+      sorry,
     },
     {
       sorry,

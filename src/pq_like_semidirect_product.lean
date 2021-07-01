@@ -38,9 +38,9 @@ begin
       ext1,
       simp only [subtype.coe_mk],
       rw ←rhd_of_eq_of_rhd,
-      rw rhd_def,
+      rw rhd_def_group,
       simp only [monoid_hom.map_mul, monoid_hom.map_mul_inv],
-      rw ←rhd_def,
+      rw ←rhd_def_group,
       refl,
     },
     {
@@ -78,9 +78,9 @@ begin
       ext1,
       simp only [subtype.coe_mk],
       rw ←rhd_of_eq_of_rhd,
-      rw rhd_def,
+      rw rhd_def_group,
       simp only [monoid_hom.map_mul, monoid_hom.map_mul_inv],
-      rw ←rhd_def,
+      rw ←rhd_def_group,
       refl,
     },
     {
@@ -104,26 +104,6 @@ begin
 end
 
 
-lemma rhd_mul : ∀ x y z : G, x ▷ (y * z) = (x ▷ y) * (x ▷ z) :=
-begin
-  intros x y z,
-  repeat {rw rhd_def},
-  group,
-end
-
-lemma mul_rhd : ∀ x y z : G, (x * y) ▷ z = x ▷ (y ▷ z) :=
-begin
-  intros x y z,
-  repeat {rw rhd_def},
-  group,
-end
-
-lemma rhd_inv : ∀ x y : G, x ▷ y⁻¹ = (x ▷ y)⁻¹ :=
-begin
-  intros x y,
-  repeat {rw ←gpow_neg_one},
-  rw power_quandle.q_pown_right,
-end 
 
 include hφ
 
@@ -153,7 +133,7 @@ begin
       {
         intro y,
         rw ←of_def,
-        rw ←rhd_def,
+        rw ←rhd_def_group,
         unfold rhs_to_pq_gen_set_semidirect,
         rw pq_morph_to_L_morph_adj_comm_of,
 
@@ -164,7 +144,7 @@ begin
           {
             rw incl_unit_eq_unit,
             simp only [mul_equiv.map_one, monoid_hom.map_one],
-            rw rhd_def,
+            rw rhd_def_group,
             simp only [mul_one, mul_right_inv],
           },
           {
@@ -173,7 +153,7 @@ begin
             rw pq_morph_to_L_morph_adj_comm_of,
             rw rhd_of_eq_of_rhd,
             rw subtype_rhd_def,
-            simp_rw rhd_def,
+            simp_rw rhd_def_group,
             cases hφ x y with z hz,
             rw hz,
             rw pq_morph_to_L_morph_adj_comm_of,
@@ -203,14 +183,14 @@ begin
       {
         intro y,
         rw ←mul_def,
-        rw ←rhd_def,
+        rw ←rhd_def_group,
         simp only [monoid_hom.map_mul, mul_aut.mul_apply],
         rw mul_rhd,
         --rw ←rhd_def at x_ih_a x_ih_b,
         specialize x_ih_b y,
-        rw ←rhd_def at x_ih_b,
+        rw ←rhd_def_group at x_ih_b,
         rw ←x_ih_b,
-        simp_rw ←rhd_def at x_ih_a,
+        simp_rw ←rhd_def_group at x_ih_a,
         rw ←x_ih_a,
       },
       {
@@ -339,7 +319,7 @@ def semidirect_product_pq_like : pq_group Q1 ⋊[φ] pq_group Q2 ≃* pq_group (
         }, 
         {
           simp only [monoid_hom.map_mul, monoid_hom.map_mul_inv],
-          simp_rw ←rhd_def,
+          simp_rw ←rhd_def_group,
           rw hx_ih_hx,
           rw hx_ih_hy,
           rw rhd_of_eq_of_rhd,
@@ -351,6 +331,11 @@ def semidirect_product_pq_like : pq_group Q1 ⋊[φ] pq_group Q2 ≃* pq_group (
           rw hx_ih,
           rw ←of_pow_eq_pow_of,
           apply congr_arg,
+          refl,
+        },
+        {
+          rw monoid_hom.map_one,
+          rw ←of_one,
           refl,
         },
       },

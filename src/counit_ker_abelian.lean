@@ -10,7 +10,7 @@ section counit_ker_abelian
 variables {G : Type u} [group G]
 
 
-lemma of_inv : ∀ x : G, of (x⁻¹) = (of x)⁻¹ :=
+lemma of_inv_group : ∀ x : G, of (x⁻¹) = (of x)⁻¹ :=
 begin
   intro x,
   repeat {rw ←gpow_neg_one},
@@ -105,7 +105,7 @@ begin
       rw power_quandle.one_rhd at hx,
       --rw hx,
       rw monoid_hom.map_inv,
-      rw of_inv,
+      rw of_inv_group,
       rw hx,
       rw ←mul_rhd ((of _) ⁻¹),
       simp only [mul_left_inv],

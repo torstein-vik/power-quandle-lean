@@ -9,13 +9,6 @@ section pq_injective
 
 variables {Q1 : Type u1} [power_quandle Q1] {Q2 : Type u2} [power_quandle Q2]
 
-lemma of_inv : ∀ x : Q1, of (x ^ (-1 : ℤ)) = (of x)⁻¹ :=
-begin
-  intro x,
-  repeat {rw ←gpow_neg_one},
-  rw of_pow_eq_pow_of,
-end
-
 theorem pq_injective_if_L_injective (f : Q1 → Q2) (hf : is_pq_morphism f) (hLf : function.injective (L_of_morph f hf)) (hQ1 : eta_injective Q1) : function.injective f :=
 begin
   intros x y hxy,
