@@ -185,4 +185,143 @@ instance abelianization_pq_is_pq : power_quandle (abelianization_pq Q) := {
     simp only [abelianization_pq_rhd_def],
   end }
 
+instance abelianization_pq_is_apq : abelian_power_quandle (abelianization_pq Q) := { 
+  apq_unit_is_morphism := begin 
+    split,
+    {
+      intros a b,
+      simp only [abelianization_pq_rhd_def],
+    },
+    {
+      intros a n,
+      symmetry,
+      apply quotient.sound,
+      fconstructor,
+      exact pre_abelianization_pq_rel'.pow_zero n,
+    }
+  end,
+  apq_inverse_is_morphism := begin 
+    split,
+    {
+      intros a b,
+      simp only [abelianization_pq_rhd_def],
+    },
+    {
+      intros a n,
+      simp only,
+      induction a,
+      {
+        rw quot_mk_helper_abelianization,
+        apply quotient.sound,
+        fconstructor,
+        exact pre_abelianization_pq_rel'.pow_neg a n,
+      },
+      {refl,},
+    },
+  end,
+  apq_addition_is_morphism := begin 
+    split,
+    {
+      intros a b,
+      cases a with a1 a2,
+      cases b with b1 b2,
+      simp only [rhd_def_prod],
+      simp only [abelianization_pq_rhd_def],
+    },
+    {
+      intros a n,
+      cases a with a1 a2,
+      simp only [pow_def_prod],
+      induction a1,
+      induction a2,
+      {
+        simp only [quot_mk_helper_abelianization],
+        apply quotient.sound,
+        fconstructor,
+        exact pre_abelianization_pq_rel'.pow_add a1 a2 n,
+      },
+      {refl,},
+      {refl,},
+    },
+  end,
+  apq_addition_assoc := begin 
+    intros a b c,
+    induction a,
+    induction b,
+    induction c,
+    {
+      simp only [quot_mk_helper_abelianization],
+      symmetry,
+      apply quotient.sound,
+      fconstructor,
+      exact pre_abelianization_pq_rel'.add_assoc a b c,
+    },
+    {refl,},
+    {refl,},
+    {refl,},
+  end,
+  apq_addition_comm := begin 
+    intros a b,
+    induction a,
+    induction b,
+    {
+      simp only [quot_mk_helper_abelianization],
+      apply quotient.sound,
+      fconstructor,
+      exact pre_abelianization_pq_rel'.add_comm a b,
+    },
+    {refl,},
+    {refl,},
+  end,
+  apq_addition_zero_right := begin 
+    intros a,
+    induction a,
+    {
+      simp only [quot_mk_helper_abelianization],
+      apply quotient.sound,
+      fconstructor,
+      exact pre_abelianization_pq_rel'.zero_right a,
+    },
+    {refl,},
+  end,
+  apq_addition_zero_left := begin 
+    intros a,
+    induction a,
+    {
+      simp only [quot_mk_helper_abelianization],
+      apply quotient.sound,
+      fconstructor,
+      refine pre_abelianization_pq_rel'.trans _ _,
+      exact a.add zero,
+      apply pre_abelianization_pq_rel'.add_comm,
+      exact pre_abelianization_pq_rel'.zero_right a,
+    },
+    {refl,},
+  end,
+  apq_inverse_addition_right := begin 
+    intros a,
+    induction a,
+    {
+      simp only [quot_mk_helper_abelianization],
+      apply quotient.sound,
+      fconstructor,
+      exact pre_abelianization_pq_rel'.neg_add_right a,
+    },
+    {refl,},
+  end,
+  apq_inverse_addition_left := begin 
+    intros a,
+    induction a,
+    {
+      simp only [quot_mk_helper_abelianization],
+      apply quotient.sound,
+      fconstructor,
+      refine pre_abelianization_pq_rel'.trans _ _,
+      exact add (a) (neg a),
+      exact pre_abelianization_pq_rel'.add_comm (neg a) a,
+      exact pre_abelianization_pq_rel'.neg_add_right a,
+    },
+    {refl,},
+  end }
+
 end abelianization_pq
