@@ -484,5 +484,116 @@ section abelianization_pq_adjoint
 variables {Q : Type u} [power_quandle Q] 
 variables {A : Type v} [abelian_power_quandle A]
 
+open pre_abelianization_pq
+
+def apq_adjoint_lift_pre (f : Q → A) (hf : is_pq_morphism f) : pre_abelianization_pq Q → A
+| (incl x) := f x
+| (add x y) := (apq_adjoint_lift_pre x) + (apq_adjoint_lift_pre y)
+| (neg x) := -(apq_adjoint_lift_pre x)
+| (zero) := 0
+| (pow x n) := (apq_adjoint_lift_pre x) ^ n
+
+def apq_adjoint_lift (f : Q → A) (hf : is_pq_morphism f) : abelianization_pq Q → A := quotient.lift (apq_adjoint_lift_pre f hf) (begin 
+  intros a b hab,
+  induction hab,
+  induction hab_hxy,
+  {
+    refl,
+  },
+  {
+    symmetry,
+    assumption,
+  },
+  {
+    transitivity,
+    assumption,
+    assumption,
+  },
+  {
+    simp only [apq_adjoint_lift_pre],
+    congr,
+    assumption,
+    assumption,
+  },
+  {
+    simp only [apq_adjoint_lift_pre],
+    congr,
+    assumption,
+  },
+  {
+    simp only [apq_adjoint_lift_pre],
+    congr,
+    assumption,
+  },
+  {
+    simp only [apq_adjoint_lift_pre],
+    rw abelian_power_quandle.apq_addition_assoc,
+  },
+  {
+    simp only [apq_adjoint_lift_pre],
+    rw abelian_power_quandle.apq_addition_comm,
+  },
+  {
+    simp only [apq_adjoint_lift_pre],
+    rw abelian_power_quandle.apq_addition_zero_right,
+  },
+  {
+    simp only [apq_adjoint_lift_pre],
+    rw abelian_power_quandle.apq_inverse_addition_right,
+  },
+  {
+    simp only [apq_adjoint_lift_pre],
+    rw power_quandle.pow_one,
+  },
+  {
+    simp only [apq_adjoint_lift_pre],
+    rw power_quandle.pow_zero,
+    rw one_preserved_by_morphism f hf,
+  },
+  {
+    simp only [apq_adjoint_lift_pre],
+    rw power_quandle.pow_comp,
+  },
+  {
+    simp only [apq_adjoint_lift_pre],
+    rw pow_dist_add,
+  },
+  {
+    simp only [apq_adjoint_lift_pre],
+    rw apq_neg_pow,
+  },
+  {
+    simp only [apq_adjoint_lift_pre],
+    rw apq_zero_pow,
+  },
+  {
+    simp only [apq_adjoint_lift_pre],
+    rw hf.1,
+    rw apq_rhd_is_right,
+  },
+  {
+    simp only [apq_adjoint_lift_pre],
+    rw hf.2,
+  },
+end)
+
+def apq_adjoint_lift_is_apq_morphism (f : Q → A) (hf : is_pq_morphism f) : is_apq_morphism (apq_adjoint_lift f hf) :=
+begin
+  split,
+  {
+    intros a b,
+    induction a,
+    induction b,
+    refl,
+    refl,
+    refl,
+  },
+  {
+    intros a n,
+    induction a,
+    refl,
+    refl,
+  },
+end
 
 end abelianization_pq_adjoint
