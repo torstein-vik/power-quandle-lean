@@ -107,3 +107,80 @@ instance sub_power_quandle_is_pq : power_quandle Q1 := {
 
 
 end sub_power_quandle
+
+
+section sub_pq_le
+
+variables {Q : Type u} [power_quandle Q]
+
+instance sub_pq_has_le : has_le (sub_power_quandle Q) := ⟨λ Q1 Q2, Q1.carrier ⊆ Q2.carrier⟩
+
+lemma sub_pq_le_def (Q1 Q2 : sub_power_quandle Q) : Q1 ≤ Q2 ↔ Q1.carrier ⊆ Q2.carrier := by refl
+
+end sub_pq_le
+
+
+section sub_pq_univ
+
+def sub_pq_univ (Q : Type u) [power_quandle Q] : sub_power_quandle Q := { 
+  carrier := set.univ,
+  closed_rhd := begin 
+    intros, exact dec_trivial,
+  end,
+  closed_pow := begin 
+    intros, exact dec_trivial,
+  end,
+  closed_one := begin 
+    intros, exact dec_trivial,
+  end }
+
+variables {Q : Type u} [power_quandle Q]
+
+def sub_pq_univ_iso_pq : sub_pq_univ Q ≃ Q :=
+begin
+  fconstructor,
+  {
+    intro x,
+    cases x with x hx,
+    exact x,
+  },
+  {
+    intro x,
+    fconstructor,
+    exact x,
+    fconstructor,
+  },
+  {
+    intro x,
+    cases x,
+    refl,
+  },
+  {
+    intro x,
+    refl,
+  },
+end
+
+lemma sub_pq_univ_iso_pq_is_pq_morphism : is_pq_morphism (@sub_pq_univ_iso_pq Q _) :=
+begin
+  split,
+  {
+    intros a b,
+    cases a,
+    cases b,
+    refl,
+  },
+  {
+    intros a n,
+    cases a,
+    refl,
+  },
+end
+
+lemma sub_pq_univ_le (Q1 : sub_power_quandle Q) : Q1 ≤ sub_pq_univ Q :=
+begin
+  rw sub_pq_le_def,
+  tauto,
+end
+
+end sub_pq_univ
