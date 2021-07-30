@@ -96,14 +96,5 @@ begin
   },
 end
 
-theorem sub_pq_group_inclusion_injective (hQ1 : sub_pq_normal Q1) : function.injective (sub_pq_group_inclusion : pq_group Q1 → pq_group Q) :=
-begin
-  refine sub_pq_group_inclusion.injective_iff.mpr _,
-  intros a ha,
-  have h_pq_group_normal_Q1 := pq_group_normal hQ1,
-  sorry,
-  -- It is injective if Q1 is centerless
-end
-
 end sub_pq_normal_pq_injective
 

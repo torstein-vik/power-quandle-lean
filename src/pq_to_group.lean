@@ -667,6 +667,19 @@ begin
     refl,
 end
 
+lemma inv_of (a : G) : of (a⁻¹) = (of a)⁻¹ :=
+begin
+    rw of_inv,
+    congr,
+    rw pow_one,
+end
+
+lemma pow_of_nat (a : G) (n : ℕ) : of (a ^ n) = (of a) ^ n :=
+begin
+    rw ←gpow_coe_nat,
+    rw ←gpow_coe_nat,
+    rw of_pow_eq_pow_of,
+end
 
 lemma pq_group_commute (a b : G) (hab : commute a b) : commute (of a) (of b) :=
 begin
