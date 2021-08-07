@@ -156,6 +156,32 @@ begin
   group,
 end
 
+lemma counit_ker_abelian_counit (a b : pq_group G) (ha : counit a = 1) : a * b = b * a :=
+begin
+  suffices : ↑(⟨a, ha⟩ : (counit : pq_group G →* G).ker) * b = b * a,
+  simp only [subtype.coe_mk] at this,
+  exact this,
+  rw counit_ker_center,
+  refl,
+end
+
+lemma counit_ker_rhd_left_counit (a b : pq_group G) (ha : counit a = 1) : a ▷ b = b :=
+begin
+  rw rhd_def_group,
+  rw counit_ker_abelian_counit a,
+  simp only [mul_inv_cancel_right],
+  exact ha,
+end
+
+lemma counit_ker_rhd_right_counit (a b : pq_group G) (ha : counit a = 1) : b ▷ a = a :=
+begin
+  rw rhd_def_group,
+  rw mul_assoc,
+  rw counit_ker_abelian_counit a,
+  simp only [mul_inv_cancel_left],
+  exact ha,
+end
+
 /-
 instance counit_ker_comm : comm_group ((counit : pq_group G →* G).ker) := {
   mul_comm := begin

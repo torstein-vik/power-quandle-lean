@@ -106,6 +106,21 @@ begin
   rw gpow_one,
 end
 
+lemma homo_locus_closed_left_inv (a : G) : homo_locus (a⁻¹, a) :=
+begin
+  convert homo_locus_closed_same_power a (-1) 1,
+  rw pow_one,
+  rw gpow_one,
+end
+
+lemma homo_locus_closed_right_inv (a : G) : homo_locus (a, a⁻¹) :=
+begin
+  convert homo_locus_closed_same_power a 1 (-1),
+  rw gpow_one,
+  rw pow_one,
+end
+
+
 lemma homo_locus_closed_symm (a b : G) (ha : homo_locus (a, b)) : homo_locus (b, a) :=
 begin
   rw homo_locus_def at *,
