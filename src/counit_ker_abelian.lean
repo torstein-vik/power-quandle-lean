@@ -165,6 +165,13 @@ begin
   refl,
 end
 
+lemma counit_ker_counit (a : ((counit : pq_group G →* G).ker)) : counit (↑a : pq_group G) = 1 :=
+begin
+  cases a with a ha,
+  simp only [subtype.coe_mk],
+  exact ha,
+end
+
 lemma counit_ker_rhd_left_counit (a b : pq_group G) (ha : counit a = 1) : a ▷ b = b :=
 begin
   rw rhd_def_group,

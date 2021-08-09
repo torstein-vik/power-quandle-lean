@@ -140,6 +140,7 @@ begin
   },
 end
 
+/-
 
 def pq_group_list_data_property (sub_pq : set (pq_group Q)) (f : (set.preimage (λ x : list Q, (list.map (of) x).prod) sub_pq) → H) 
 (hf : ∀ x y : pre_pq_group Q, ∀ hx : ⟦x⟧ ∈ sub_pq, ∀ hy : ⟦y⟧ ∈ sub_pq, setoid.r x y → f ⟨(create_list_from_pq x), begin 
@@ -184,6 +185,7 @@ begin
   }
 end
 
+-/
 
 /-
 lemma pq_group_list_data_property_pre_aux (sub_pq : set (pq_group Q)) (x : pre_pq_group Q) (hx : ⟦x⟧ ∈ sub_pq) : (list.map of (create_list_from_pq x)).prod ∈ sub_pq :=
@@ -316,6 +318,20 @@ begin
   rw me,
 end
 
+variables {H : Type*} [group H]
+
+theorem morphism_equality_comp_elem_id (f : pq_group Q →* H) (g : H →* pq_group Q) (hgf : ∀ q : Q, g (f (of q)) = of q) (x : pq_group Q) : g (f x) = x :=
+begin
+  revert x,
+  refine pq_group_word_induction _ _,
+  {
+    simp only [monoid_hom.map_one],
+  },
+  {
+    intros x y hx,
+    simp only [hgf, hx, mul_right_inj, monoid_hom.map_mul],
+  },
+end
 
 end morphism_equality
 
@@ -330,23 +346,6 @@ def counit_ker_decomp_pre : G → list G → list (G × G)
    
 def counit_ker_decomp : list G → list (G × G) := λ x, counit_ker_decomp_pre 1 (x)
 
-lemma counit_ker_decomp_append_one (x : list G) (a : G) : counit_ker_decomp (x ++ [a]) = counit_ker_decomp x ++ [(x.prod, a)] :=
-begin
-  induction x,
-  {
-    unfold counit_ker_decomp,
-    simp only [list.nil_append, list.prod_nil],
-    refl,
-  },
-  {
-    simp only [list.cons_append, list.prod_cons],
-    unfold counit_ker_decomp,
-    unfold counit_ker_decomp_pre,
-    simp only [one_mul],
-    --rw x_ih,
-    sorry,
-  },
-end
 
 lemma counit_ker_pre_effect (x : list G) (a : G) : counit_ker_decomp_pre a x = (counit_ker_decomp x).map (λ b : (G × G), (a * b.1, b.2)) :=
 begin
@@ -393,6 +392,13 @@ begin
   },
 end
 
+
+lemma counit_ker_decomp_append_one (x : list G) (a : G) : counit_ker_decomp (x ++ [a]) = counit_ker_decomp x ++ [(x.prod, a)] :=
+begin
+  rw counit_ker_decomp_append,
+  refl,
+end
+
 lemma counit_ker_decomp_comp (x : list G) : (x.map of).prod = ((counit_ker_decomp x).map (λ a : G × G, of a.1 * of a.2 * (of (a.1 * a.2))⁻¹)).prod * of (x.prod) :=
 begin
   unfold counit_ker_decomp,
@@ -428,6 +434,12 @@ begin
       rw ←mul_assoc,
     },
   },
+end
+
+lemma counit_ker_decomp_comp_alt (x : list G) : (x.map of).prod * (of (x.prod))⁻¹ = ((counit_ker_decomp x).map (λ a : G × G, of a.1 * of a.2 * (of (a.1 * a.2))⁻¹)).prod :=
+begin
+  rw counit_ker_decomp_comp,
+  simp only [mul_inv_cancel_right],
 end
 
 variables {H : Type*} [group H]
