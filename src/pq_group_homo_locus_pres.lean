@@ -33,8 +33,6 @@ inductive pre_homo_locus_pres_rel' (G : Type u) [group G] : pre_homo_locus_pres 
 | homo_locus_eq_zero (a b : G) (hab : homo_locus (a, b)) : pre_homo_locus_pres_rel' (incl a b) unit
 | third_cancel (a b x : G) : pre_homo_locus_pres_rel' (incl a b) (mul (mul (incl x a)  (incl (x * a) (b))) (inv (incl x (a * b))))
 | rhd_inv (a b : G) : pre_homo_locus_pres_rel' (incl a b) (inv (incl (a * b) (a⁻¹)))
-| rev_inv (a b : G) : pre_homo_locus_pres_rel' (inv (incl a b)) (incl (b⁻¹) (a⁻¹))
--- Is rev-inv necessary? Doesn't seem so in experiemnts...
 
 inductive pre_homo_locus_pres_rel (G : Type u) [group G] : pre_homo_locus_pres G → pre_homo_locus_pres G → Prop
 | rel {a b : pre_homo_locus_pres G} (r : pre_homo_locus_pres_rel' G a b) : pre_homo_locus_pres_rel a b
@@ -108,7 +106,7 @@ lemma homo_locus_pres_quot_mk_helper (x : pre_homo_locus_pres G) : quot.mk setoi
 
 variables {H : Type*} [group H]
 
-def is_homo_locus_liftable (f : G × G → H) : Prop := (∀ a b : G × G, f a * f b = f b * f a) ∧ (∀ a b : G, homo_locus (a, b) → f (a, b) = 1) ∧ (∀ a b x : G, f (a, b) = f (x, a) * f (x * a, b) * ((f (x, (a * b)))⁻¹)) ∧ (∀ a b : G, f (a, b) = (f (a * b, a⁻¹))⁻¹) ∧ (∀ a b : G, (f (a, b))⁻¹ = f (b⁻¹, a⁻¹))
+def is_homo_locus_liftable (f : G × G → H) : Prop := (∀ a b : G × G, f a * f b = f b * f a) ∧ (∀ a b : G, homo_locus (a, b) → f (a, b) = 1) ∧ (∀ a b x : G, f (a, b) = f (x, a) * f (x * a, b) * ((f (x, (a * b)))⁻¹)) ∧ (∀ a b : G, f (a, b) = (f (a * b, a⁻¹))⁻¹)
 
 
 def lift_homo_locus_pres_morph_pre (f : G × G → H) (hf : is_homo_locus_liftable f) : pre_homo_locus_pres G → H
@@ -176,11 +174,7 @@ def lift_homo_locus_pres_morph (f : G × G → H) (hf : is_homo_locus_liftable f
     },
     {
       unfold lift_homo_locus_pres_morph_pre,
-      rw hf.2.2.2.1,
-    },
-    {
-      unfold lift_homo_locus_pres_morph_pre,
-      rw hf.2.2.2.2,
+      rw hf.2.2.2,
     },
   end,
   map_one' := begin 
@@ -315,12 +309,81 @@ begin
   simp only [mul_inv_cancel_right],
 end
 
+lemma homo_locus_of_inv_assoc (a b : G) : (homo_locus_of (a, b))⁻¹ = homo_locus_of (b⁻¹, a * b) :=
+begin
+  have : (homo_locus_of (b⁻¹, a))⁻¹ * homo_locus_of (b⁻¹, a) = 1,
+  {
+    simp only [mul_left_inv],
+  },
+  rw homo_locus_of_inv at this,
+  rw homo_locus_assoc_alt at this,
+  simp only [inv_inv, inv_mul_cancel_right] at this,
+  group,
+  simp only [gpow_one, gpow_neg],
+  refine inv_inj.mp _,
+  simp only [mul_inv_rev, one_inv, inv_inv],
+  exact this,
+end
+
+lemma homo_locus_of_inv_cancel (a b : G) : (homo_locus_of (a, b))⁻¹ = homo_locus_of (a * b, b⁻¹) :=
+begin
+  rw homo_locus_assoc_alt,
+  have : homo_locus_of (a, b * b⁻¹) = 1,
+  {
+    simp only [mul_right_inv],
+    rw homo_locus_of_one,
+    exact homo_locus_closed_right_one a,
+  },
+  rw this,
+  clear this,
+  have : homo_locus_of (b, b⁻¹) = 1,
+  {
+    rw homo_locus_of_one,
+    exact homo_locus_closed_right_inv b,
+  },
+  rw this,
+  clear this,
+  simp only [one_mul],
+end
+
+lemma homo_locus_of_symm (a b c : G) : homo_locus_of (a, b) = homo_locus_of (b, a) :=
+begin
+  have : ∀ a b : G, homo_locus_of (b⁻¹, a * b) = homo_locus_of (a * b, b⁻¹),
+  {
+    intros a b,
+    rw ←homo_locus_of_inv_cancel,
+    rw ←homo_locus_of_inv_assoc,
+  },
+  specialize this (a * b) (b⁻¹),
+  simp only [inv_inv, mul_inv_cancel_right] at this,
+  symmetry,
+  exact this,
+end
+
+lemma homo_locus_of_shift (a b : G) : homo_locus_of (a, b) = homo_locus_of (a, (a*b)⁻¹) :=
+begin
+  have : ∀ a b : G, homo_locus_of (a * b, b⁻¹) = homo_locus_of (a * b, a⁻¹),
+  {
+    intros a b,
+    rw ←homo_locus_of_inv a b,
+    rw ←homo_locus_of_inv_cancel,
+  },
+  specialize this (a * b) (b⁻¹),
+  simp only [mul_inv_rev, inv_inv, mul_inv_cancel_right] at this,
+  convert this,
+  simp only [mul_inv_rev],
+end
+
+-- Try to prove another way, and remove from quotient rel
+-- An idea: use isomorphism to obtain this
 lemma homo_locus_of_inv_rev (a b : G) : (homo_locus_of (a, b))⁻¹ = homo_locus_of (b⁻¹, a⁻¹) :=
 begin
-  apply quotient.sound,
-  simp only,
-  fconstructor,
-  exact pre_homo_locus_pres_rel'.rev_inv a b,
+  refine inv_inj.mp _,
+  simp only [inv_inv],
+  rw homo_locus_of_inv_assoc,
+  simp only [inv_inv],
+  rw homo_locus_of_shift,
+  simp only [mul_inv_rev],
 end
 
 end pq_group_homo_locus_pres
@@ -579,7 +642,6 @@ begin
       },
       group,
     },
-    split,
     {
       intros a b,
       simp only,
@@ -591,31 +653,6 @@ begin
       rw inv_of,
       simp only [inv_inv],
       group,
-    },
-    {
-      intros a b,
-      simp only,
-      ext1,
-      simp only [mul_inv_rev, subgroup.coe_inv, inv_inv, subgroup.coe_mk],
-      suffices : (of (a * b))⁻¹ * ((of (a * b) * ((of b)⁻¹ * (of a)⁻¹)) * of (a * b)) = of b⁻¹ * of a⁻¹ * (of (b⁻¹ * a⁻¹))⁻¹,
-      {
-        rw counit_ker_abelian_counit ((of (a * b) * ((of b)⁻¹ * (of a)⁻¹))) _ at this,
-        {
-          simp only [inv_mul_cancel_left] at this,
-          exact this,
-        },
-        {
-          simp only [counit_of, monoid_hom.map_mul, monoid_hom.map_inv],
-          group,
-        },
-      },
-      simp only [←mul_assoc, one_mul, mul_left_inv],
-      rw inv_of,
-      rw inv_of,
-      congr,
-      rw ←inv_of,
-      congr,
-      simp only [mul_inv_rev, inv_inv],
     },
   },
 end
