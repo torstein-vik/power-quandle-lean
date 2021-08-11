@@ -104,6 +104,23 @@ begin
   {refl,},
 end
 
+theorem pq_group_of_mul_induction {P : pq_group Q → Prop} 
+(hof : ∀ x : Q,  P (of x)) 
+(hmul : ∀ x y : pq_group Q, P x → P y → P (x * y)) 
+: ∀ x : pq_group Q, P x :=
+begin
+  refine pq_group_word_induction _ _,
+  {
+    convert hof 1,
+    rw of_one,
+  },
+  {
+    intros x y,
+    apply hmul,
+    apply hof,
+  },
+end
+
 theorem pq_group_list {P : pq_group Q → Prop}
 (hl : ∀ x : list Q, P (x.map of).prod)
 : ∀ x : pq_group Q, P x :=
@@ -181,6 +198,7 @@ begin
     specialize hf x_a x_b ha hb p,
     rw ←hf,
     simp_rw hf,
+    -- Perhaps we can use eq_rec_constant
     sorry,
   }
 end
@@ -247,6 +265,7 @@ section cleaned_induction
 
 variables {Q : Type u} [power_quandle Q]
 
+-- Better to use pq_group_mul_of_induction
 theorem pq_group_induction {P : pq_group Q → Prop}
 (hof : ∀ q : Q, P (of q))
 (hmul : ∀ a b : pq_group Q, P a → P b → P (a * b))
