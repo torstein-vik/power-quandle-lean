@@ -269,6 +269,7 @@ begin
       assumption,
     },
     {
+      -- Factor out to lemma
       have proc_is_inv : ∀ a : list Q, (list.map of (list.map (λ (g : Q), g ^ (-1 : ℤ)) (list.reverse a))).prod = ((list.map of a).prod)⁻¹,
       {
         intros a,
