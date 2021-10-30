@@ -212,4 +212,66 @@ instance conj_pq_is_pq : power_quandle (conj_pq Q) := {
   ..conj_pq_has_pow,
   ..conj_pq_has_one }
 
+class comm_power_quandle (Q : Type u) extends power_quandle Q :=
+(rhd_comm : ∀ a b : Q, a ▷ b = b)
+
+instance conj_pq_is_comm : comm_power_quandle (conj_pq Q) := { 
+  rhd_comm := begin 
+    rintros ⟨a⟩ ⟨b⟩,
+    simp only [quot_mk_helper_conj_pq],
+    simp only [conj_pq_rhd_def],
+    apply quotient.sound,
+    use ([a ^ (-1 : ℤ)] : list Q),
+    simp only [list.foldl],
+    rw ←power_quandle.pow_one a,
+    rw power_quandle.pow_comp,
+    norm_num,
+    rw power_quandle.rhd_pow_add,
+    norm_num,
+    rw power_quandle.pow_zero,
+    rw power_quandle.one_rhd,
+  end }
+
+variables {Q1 : Type*} [comm_power_quandle Q1]
+
+def conj_pq_lift (f : Q → Q1) (hf : is_pq_morphism f) : conj_pq Q → Q1 := λ x, quotient.lift_on x (λ a, f a) begin 
+  intros a b hab,
+  clear x,
+  simp only,
+  cases hab with x hx,
+  rw hx,
+  clear hx b,
+  induction x generalizing a,
+  {
+    refl,
+  },
+  {
+    simp only [list.foldl],
+    rw ←x_ih,
+    rw hf.1,
+    rw comm_power_quandle.rhd_comm,
+  },
+end
+
+lemma conj_pq_lift_is_pq_morphism (f : Q → Q1) (hf : is_pq_morphism f) : is_pq_morphism (conj_pq_lift f hf) :=
+begin
+  split,
+  {
+    rintros ⟨a⟩ ⟨b⟩,
+    simp only [quot_mk_helper_conj_pq],
+    simp only [conj_pq_rhd_def],
+    unfold conj_pq_lift,
+    simp only [quotient.lift_on_beta],
+    rw hf.1,
+  },
+  {
+    rintros ⟨a⟩ n,
+    simp only [quot_mk_helper_conj_pq],
+    simp only [conj_pq_pow_def],
+    unfold conj_pq_lift,
+    simp only [quotient.lift_on_beta],
+    rw hf.2,
+  },
+end
+
 end conj_pq
