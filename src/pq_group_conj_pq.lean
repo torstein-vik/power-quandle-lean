@@ -11,3 +11,114 @@
 -- What else can we say about conjugacy classes? 
 
 -- It is Gr Cc Pq G ≃* Ab (Gr Pq G) which is sometimes A × Ab(G) (when Gr Pq G ≃* G × A)
+
+import conj_pq
+import comm_power_quandle
+import group_theory.abelianization
+
+universe u
+
+section pq_group_conj_pq
+
+variables {Q : Type u} [power_quandle Q]
+
+def pq_group_conj_pq_abelianization_forward_aux : Q → abelianization (pq_group Q) := λ a,  abelianization.of (of a)
+
+lemma pq_group_conj_pq_abelianization_forward_aux_is_pq_morphism : is_pq_morphism (@pq_group_conj_pq_abelianization_forward_aux Q _) :=
+begin
+  split,
+  {
+    intros a b,
+    unfold pq_group_conj_pq_abelianization_forward_aux,
+    rw ←rhd_of_eq_of_rhd,
+    simp only [rhd_def_group],
+    simp only [monoid_hom.map_mul, mul_inv_cancel_comm, monoid_hom.map_mul_inv],
+  },
+  {
+    intros a n,
+    unfold pq_group_conj_pq_abelianization_forward_aux,
+    rw of_pow_eq_pow_of,
+    rw monoid_hom.map_gpow,
+  },
+end
+
+def pq_group_conj_pq_abelianization_forward : pq_group (conj_pq Q) →* abelianization (pq_group Q) :=
+begin
+  fapply pq_morph_to_L_morph_adj,
+  {
+    fapply conj_pq_lift,
+    exact pq_group_conj_pq_abelianization_forward_aux,
+    exact pq_group_conj_pq_abelianization_forward_aux_is_pq_morphism,
+  },
+  {
+    apply conj_pq_lift_is_pq_morphism,
+  },
+end
+
+
+def pq_group_conj_pq_abelianization_backward : abelianization (pq_group Q) →* pq_group (conj_pq Q) :=
+begin
+  fapply abelianization.lift,
+  fapply pq_morph_to_L_morph_adj,
+  {
+    intros a,
+    exact of (conj_pq_of a),
+  },
+  {
+    split,
+    {
+      intros a b,
+      rw conj_pq_of_is_pq_morphism.1,
+      rw of_is_pq_morphism.1,
+    },
+    {
+      intros a n,
+      rw conj_pq_of_is_pq_morphism.2,
+      rw of_is_pq_morphism.2,
+    },
+  },
+end
+
+local attribute [instance] quotient_group.left_rel
+
+def pq_group_conj_pq_abelianization : pq_group (conj_pq Q) ≃* abelianization (pq_group Q) := { 
+  to_fun := pq_group_conj_pq_abelianization_forward,
+  inv_fun := pq_group_conj_pq_abelianization_backward,
+  left_inv := begin 
+    intros x,
+    revert x,
+    refine pq_group_of_mul_induction _ _,
+    {
+      intros a,
+      induction a,
+      refl,
+      refl,
+    },
+    {
+      intros x y hx hy,
+      simp only [hx, hy, monoid_hom.map_mul],
+    },
+  end,
+  right_inv := begin
+    intros x,
+    induction x,
+    revert x,
+    refine pq_group_of_mul_induction _ _,
+    {
+      intros x,
+      refl,
+    },
+    {
+      intros x y hx hy,
+      have quot_mk_helper_abelianization : (quot.mk ((quotient_group.left_rel _)).r (x * y) : abelianization (pq_group Q)) = ((quot.mk ((quotient_group.left_rel _)).r (x) : abelianization (pq_group Q)) * (quot.mk ((quotient_group.left_rel _)).r (y) : abelianization (pq_group Q)) : abelianization (pq_group Q)) := rfl,
+      rw quot_mk_helper_abelianization,
+      simp only [monoid_hom.map_mul, hx, hy],
+    },
+    refl,
+  end,
+  map_mul' := begin 
+    intros x y,
+    simp only [monoid_hom.map_mul],
+  end }
+
+end pq_group_conj_pq

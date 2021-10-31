@@ -1,7 +1,7 @@
 
 -- Define Cc Q as the power quandle of the "conjugacy classes" of Q. 
 
-import power_quandle
+import comm_power_quandle
 
 universe u
 
@@ -103,7 +103,7 @@ begin
   },
 end
 
-instance pq_is_conj_setoid : setoid Q := ⟨pq_is_conj, begin 
+def pq_is_conj_setoid : setoid Q := ⟨pq_is_conj, begin 
   split,
   apply pq_is_conj_refl,
   split,
@@ -111,7 +111,13 @@ instance pq_is_conj_setoid : setoid Q := ⟨pq_is_conj, begin
   apply pq_is_conj_trans,
 end⟩
 
+local attribute [instance] pq_is_conj_setoid
+
 def conj_pq (Q : Type u) [power_quandle Q] : Type u := @quotient Q (pq_is_conj_setoid)
+
+def conj_pq_of (a : Q) : conj_pq Q := ⟦a⟧ 
+
+lemma conj_pq_of_def (a : Q) : conj_pq_of a = ⟦a⟧ := rfl
 
 instance conj_pq_has_rhd : has_rhd (conj_pq Q) := ⟨λ x y, quotient.lift_on₂ x y (λ a b, ⟦a ▷ b⟧) begin 
   intros a b c d hab hcd,
@@ -212,8 +218,19 @@ instance conj_pq_is_pq : power_quandle (conj_pq Q) := {
   ..conj_pq_has_pow,
   ..conj_pq_has_one }
 
-class comm_power_quandle (Q : Type u) extends power_quandle Q :=
-(rhd_comm : ∀ a b : Q, a ▷ b = b)
+
+lemma conj_pq_of_is_pq_morphism : is_pq_morphism (@conj_pq_of Q _) :=
+begin
+  split,
+  {
+    intros a b,
+    refl,
+  },
+  {
+    intros a n,
+    refl,
+  },
+end
 
 instance conj_pq_is_comm : comm_power_quandle (conj_pq Q) := { 
   rhd_comm := begin 
@@ -273,5 +290,7 @@ begin
     rw hf.2,
   },
 end
+
+lemma conj_pq_lift_of (f : Q → Q1) (hf : is_pq_morphism f) (a : Q) : conj_pq_lift f hf (conj_pq_of a) = f a := rfl
 
 end conj_pq
