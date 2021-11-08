@@ -14,7 +14,7 @@ def sub_L_pq (H : subgroup (pq_group Q)) : sub_power_quandle Q := {
     intros x y hx hy,
     rw set.mem_def at *,
     rw ←rhd_of_eq_of_rhd,
-    rw rhd_def,
+    rw rhd_def_group,
     refine H.mul_mem _ _,
     refine H.mul_mem _ _,
     assumption,
@@ -27,6 +27,11 @@ def sub_L_pq (H : subgroup (pq_group Q)) : sub_power_quandle Q := {
     rw set.mem_def at *,
     rw of_pow_eq_pow_of,
     exact subgroup.gpow_mem H hx n,
+  end,
+  closed_one := begin 
+    rw set.mem_def,
+    rw of_one,
+    exact subgroup.one_mem H,
   end }
 
 

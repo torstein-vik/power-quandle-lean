@@ -21,7 +21,7 @@ begin
   split,
   {
     intro hxy,
-    have hxy1 := congr_arg (L_of_morph counit (functoriality_group_bundled_to_pq counit)) hxy,
+    have hxy1 := congr_arg (L_of_morph counit (functoriality_group_to_pq counit)) hxy,
     simp only [monoid_hom.map_mul, L_of_morph_of, counit_of] at hxy1,
     symmetry,
     exact hxy1,
@@ -40,7 +40,7 @@ begin
   split,
   {
     intro hxy,
-    have hxy1 := congr_arg (L_of_morph counit (functoriality_group_bundled_to_pq counit)) hxy,
+    have hxy1 := congr_arg (L_of_morph counit (functoriality_group_to_pq counit)) hxy,
     simp only [monoid_hom.map_mul, L_of_morph_of, counit_of] at hxy1,
     symmetry,
     exact hxy1,
@@ -88,7 +88,7 @@ begin
     split,
     {
       intro hxg,
-      have hxg1 := congr_arg (L_of_morph counit (functoriality_group_bundled_to_pq counit)) hxg,
+      have hxg1 := congr_arg (L_of_morph counit (functoriality_group_to_pq counit)) hxg,
       simp only [monoid_hom.map_mul, L_of_morph_of, counit_of, counit_prod_map_of] at hxg1,
       rw hxg1,
       apply congr_arg,

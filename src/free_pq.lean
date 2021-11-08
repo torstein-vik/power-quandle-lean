@@ -1,11 +1,12 @@
 
-import pq_induce_lhd
+import power_quandle
 
 universe u
 
 section pre_free_pq
 
 inductive pre_free_pq (S : Type u) : Type u
+| unit : pre_free_pq
 | incl (x : S) : pre_free_pq
 | rhd (x y : pre_free_pq) : pre_free_pq
 | pow (x : pre_free_pq) (n : ℤ) : pre_free_pq
@@ -22,14 +23,14 @@ inductive pre_free_pq_rel' (S : Type u) : pre_free_pq S → pre_free_pq S → Ty
   pre_free_pq_rel' (rhd a b) (rhd a' b') 
 | congr_pow {a a' : pre_free_pq S} {n : ℤ} (ha : pre_free_pq_rel' a a') : 
   pre_free_pq_rel' (pow a n) (pow a' n)
-| right_dist (a b c : pre_free_pq S) : pre_free_pq_rel' (rhd a (rhd b c)) (rhd (rhd a b) (rhd a c))
-| self_idem_right (a : pre_free_pq S) : pre_free_pq_rel' (rhd a a) (a)
+| rhd_dist (a b c : pre_free_pq S) : pre_free_pq_rel' (rhd a (rhd b c)) (rhd (rhd a b) (rhd a c))
+| rhd_idem (a : pre_free_pq S) : pre_free_pq_rel' (rhd a a) (a)
 | pow_one (a : pre_free_pq S) : pre_free_pq_rel' (pow a (1 : ℤ)) (a)
+| pow_zero (a : pre_free_pq S) : pre_free_pq_rel' (pow a (0 : ℤ)) (unit)
 | pow_comp (a : pre_free_pq S) (n m : ℤ) : pre_free_pq_rel' (pow (pow a n) m) (pow a (n * m))
-| rhd_pow_zero (a b : pre_free_pq S) : pre_free_pq_rel' (rhd a (pow b (0 : ℤ))) (pow b (0 : ℤ))
-| pow_zero_rhd (a b : pre_free_pq S) : pre_free_pq_rel' (rhd (pow a (0 : ℤ)) b) (b)
-| pow_neg_one_rhd (a : pre_free_pq S) : pre_free_pq_rel' (rhd (pow a (-1 : ℤ)) a) (a)
-| rhd_pow (a b : pre_free_pq S) (n : ℤ) : pre_free_pq_rel' (pow (rhd a b) n) (rhd a (pow b n))
+| rhd_one (a : pre_free_pq S) : pre_free_pq_rel' (rhd a unit) (unit)
+| one_rhd (a : pre_free_pq S) : pre_free_pq_rel' (rhd unit a) (a)
+| pow_rhd (a b : pre_free_pq S) (n : ℤ) : pre_free_pq_rel' (pow (rhd a b) n) (rhd a (pow b n))
 | rhd_pow_add (a b : pre_free_pq S) (n m : ℤ) : pre_free_pq_rel' (rhd (pow a n) (rhd (pow a m) b)) (rhd (pow a (n + m)) b)
 
 
@@ -69,7 +70,7 @@ instance pre_free_pq.setoid (S : Type*) : setoid (pre_free_pq S) :=
 def free_pq (S : Type*) := quotient (pre_free_pq.setoid S)
 
 
-instance free_pq_rhd : has_triangle_right (free_pq S) := ⟨λ a b, quotient.lift_on₂ a b (λ a b, ⟦rhd a b⟧) begin 
+instance free_pq_rhd : has_rhd (free_pq S) := ⟨λ a b, quotient.lift_on₂ a b (λ a b, ⟦rhd a b⟧) begin 
   intros a1 b1 a2 b2,
   intros ha hb,
   cases ha,
@@ -85,19 +86,21 @@ instance free_pq_pow : has_pow (free_pq S) ℤ := ⟨λ a n, quotient.lift_on a 
   exact (pre_free_pq_rel'.congr_pow hab_r).rel,
 end⟩
 
-instance free_pq_is_pq : power_quandle (free_pq S) := 
-begin
-  apply induce_lhd,
-  exact (λ a b c, quotient.induction_on₃ a b c (λ a b c, quotient.sound (pre_free_pq_rel'.right_dist a b c).rel)),
-  exact (λ a, quotient.induction_on a (λ a, quotient.sound (pre_free_pq_rel'.self_idem_right a).rel)),
-  exact (λ a, quotient.induction_on a (λ a, quotient.sound (pre_free_pq_rel'.pow_one a).rel)),
-  exact (λ a n m, quotient.induction_on a (λ a, quotient.sound (pre_free_pq_rel'.pow_comp a n m).rel)),
-  exact (λ a b, quotient.induction_on₂ a b (λ a b, quotient.sound (pre_free_pq_rel'.rhd_pow_zero a b).rel)),
-  exact (λ a b, quotient.induction_on₂ a b (λ a b, quotient.sound (pre_free_pq_rel'.pow_zero_rhd a b).rel)),
-  exact (λ a, quotient.induction_on a (λ a, quotient.sound (pre_free_pq_rel'.pow_neg_one_rhd a).rel)),
-  exact (λ a b n, quotient.induction_on₂ a b (λ a b, quotient.sound (pre_free_pq_rel'.rhd_pow a b n).rel)),
-  exact (λ a b n m, quotient.induction_on₂ a b (λ a b, quotient.sound (pre_free_pq_rel'.rhd_pow_add a b n m).rel)),
-end
+instance free_pq_one : has_one (free_pq S) := ⟨quotient.mk unit⟩
+
+instance free_pq_is_pq : power_quandle (free_pq S) := { 
+  rhd_dist := (λ a b c, quotient.induction_on₃ a b c (λ a b c, quotient.sound (pre_free_pq_rel'.rhd_dist a b c).rel)),
+  rhd_idem := (λ a, quotient.induction_on a (λ a, quotient.sound (pre_free_pq_rel'.rhd_idem a).rel)),
+  pow_one := (λ a, quotient.induction_on a (λ a, quotient.sound (pre_free_pq_rel'.pow_one a).rel)),
+  pow_zero := (λ a, quotient.induction_on a (λ a, quotient.sound (pre_free_pq_rel'.pow_zero a).rel)),
+  pow_comp := (λ a n m, quotient.induction_on a (λ a, quotient.sound (pre_free_pq_rel'.pow_comp a n m).rel)),
+  rhd_one := (λ a, quotient.induction_on a (λ a, quotient.sound (pre_free_pq_rel'.rhd_one a).rel)),
+  one_rhd := (λ a, quotient.induction_on a (λ a, quotient.sound (pre_free_pq_rel'.one_rhd a).rel)),
+  pow_rhd := (λ a b n, quotient.induction_on₂ a b (λ a b, quotient.sound (pre_free_pq_rel'.pow_rhd a b n).rel)),
+  rhd_pow_add := (λ a b n m, quotient.induction_on₂ a b (λ a b, quotient.sound (pre_free_pq_rel'.rhd_pow_add a b n m).rel)),
+  ..free_pq_rhd,
+  ..free_pq_pow,
+  ..free_pq_one }
 
 
 def free_pq_of (s : S) : free_pq S := ⟦incl s⟧
@@ -108,6 +111,7 @@ lemma free_pq_rhd_def (x y : pre_free_pq S) : ⟦rhd x y⟧ = (⟦x⟧ ▷ ⟦y�
 
 lemma free_pq_pow_def (x : pre_free_pq S) (n : ℤ) : ⟦pow x n⟧ = (⟦x⟧ ^ n : free_pq S) := rfl
 
+lemma free_pq_one_def : ⟦(unit : pre_free_pq S)⟧ = (1 : free_pq S) := rfl
 
 lemma quot_mk_helper_free_pq (a : pre_free_pq S) : quot.mk setoid.r a = ⟦a⟧ := rfl
 
@@ -118,6 +122,9 @@ def free_pq_adjoint_pre (f : S → Q) : pre_free_pq S → Q :=
 begin
   intro x,
   induction x,
+  {
+    exact 1,
+  },
   {
     exact f x,
   },
@@ -135,6 +142,7 @@ lemma free_pq_adjoint_pre_rhd (f : S → Q) (x y : pre_free_pq S) : free_pq_adjo
 
 lemma free_pq_adjoint_pre_pow (f : S → Q) (x : pre_free_pq S) (n : ℤ) : free_pq_adjoint_pre f (x.pow n) = (free_pq_adjoint_pre f x) ^ n := rfl
 
+lemma free_pq_adjoint_pre_one (f : S → Q) : free_pq_adjoint_pre f (unit : pre_free_pq S) = 1 := rfl
 
 def free_pq_adjoint (f : S → Q) : free_pq S → Q :=
 begin
@@ -172,15 +180,19 @@ begin
     },
     {
       repeat {rw free_pq_adjoint_pre_rhd},
-      apply rack.right_dist,
+      apply power_quandle.rhd_dist,
     },
     {
       repeat {rw free_pq_adjoint_pre_rhd},
-      apply quandle.self_idem_right,
+      apply power_quandle.rhd_idem,
     },
     {
       repeat {rw free_pq_adjoint_pre_pow},
-      apply power_quandle.pow_1,
+      apply power_quandle.pow_one,
+    },
+    {
+      repeat {rw free_pq_adjoint_pre_pow},
+      apply power_quandle.pow_zero,
     },
     {
       repeat {rw free_pq_adjoint_pre_pow},
@@ -188,29 +200,23 @@ begin
     },
     {
       repeat {rw free_pq_adjoint_pre_rhd},
-      repeat {rw free_pq_adjoint_pre_pow},
-      apply power_quandle.q_pow0,
+      repeat {rw free_pq_adjoint_pre_one},
+      apply power_quandle.rhd_one,
+    },
+    {
+      repeat {rw free_pq_adjoint_pre_rhd},
+      repeat {rw free_pq_adjoint_pre_one},
+      apply power_quandle.one_rhd,
     },
     {
       repeat {rw free_pq_adjoint_pre_rhd},
       repeat {rw free_pq_adjoint_pre_pow},
-      apply pow_0_rhd,
+      apply power_quandle.pow_rhd,
     },
     {
       repeat {rw free_pq_adjoint_pre_rhd},
       repeat {rw free_pq_adjoint_pre_pow},
-      apply pow_neg_one_rhd_self,
-    },
-    {
-      repeat {rw free_pq_adjoint_pre_rhd},
-      repeat {rw free_pq_adjoint_pre_pow},
-      repeat {rw free_pq_adjoint_pre_rhd},
-      apply power_quandle.q_pown_right,
-    },
-    {
-      repeat {rw free_pq_adjoint_pre_rhd},
-      repeat {rw free_pq_adjoint_pre_pow},
-      apply power_quandle.q_powadd,
+      apply power_quandle.rhd_pow_add,
     },
   },
 end

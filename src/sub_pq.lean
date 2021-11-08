@@ -1,5 +1,5 @@
 
-import pq_induce_lhd
+import power_quandle
 
 universe u
 
@@ -10,6 +10,7 @@ structure sub_power_quandle (Q : Type u) [power_quandle Q] :=
 (carrier : set Q)
 (closed_rhd : ∀ x y : Q, x ∈ carrier → y ∈ carrier → (x ▷ y) ∈ carrier)
 (closed_pow : ∀ x : Q, ∀ n : ℤ, x ∈ carrier → x ^ n ∈ carrier)
+(closed_one : (1 : Q) ∈ carrier)
 
 
 variables {Q : Type u} [power_quandle Q]
@@ -24,106 +25,162 @@ def spq_rhd : Q1 → Q1 → Q1 := λ ⟨x, hx⟩ ⟨y, hy⟩, ⟨x ▷ y, Q1.clo
 
 def spq_pow : Q1 → ℤ → Q1 := λ ⟨x, hx⟩ n, ⟨x ^ n, Q1.closed_pow x n hx⟩
 
-instance sub_power_quandle_has_rhd : has_triangle_right Q1 := ⟨spq_rhd⟩
+def spq_one : Q1 := ⟨1, Q1.closed_one⟩
+
+instance sub_power_quandle_has_rhd : has_rhd Q1 := ⟨spq_rhd⟩
 
 instance sub_power_quandle_has_pow : has_pow Q1 ℤ := ⟨spq_pow⟩
+
+instance sub_power_quandle_has_one : has_one Q1 := ⟨spq_one⟩
 
 lemma spq_rhd_def (a b : Q) (ha : a ∈ Q1.carrier) (hb : b ∈ Q1.carrier) : (⟨a, ha⟩ ▷ ⟨b, hb⟩ : Q1) = ⟨a ▷ b, (Q1.closed_rhd a b ha hb)⟩ := rfl 
 
 lemma spq_pow_def (a : Q) (n : ℤ) (ha : a ∈ Q1.carrier) : (⟨a, ha⟩ ^ n : Q1) = ⟨a ^ n, (Q1.closed_pow a n ha)⟩ := rfl 
 
+lemma spq_one_def : (1 : Q1) = ⟨1, Q1.closed_one⟩ := rfl
 
-instance sub_power_quandle_is_pq : power_quandle Q1 :=
+lemma coe_rhd (a b : Q1) : (↑a : Q) ▷ (↑b) = ↑(a ▷ b) := 
 begin
-  apply induce_lhd,
-  {
-    intros a b c,
-    ext1,
-    cases a with a ha,
-    cases b with b hb,
-    cases c with c hc,
-    repeat {rw spq_rhd_def},
-    simp only [subtype.coe_mk],
-    exact rack.right_dist a b c,
-  },
-  {
-    intros a,
-    ext1,
-    cases a with a ha,
-    repeat {rw spq_rhd_def},
-    simp only [subtype.coe_mk],
-    exact quandle.self_idem_right a,
-  },
-  {
-    intros a,
-    ext1,
-    cases a with a ha,
-    rw spq_pow_def,
-    simp only [subtype.coe_mk],
-    exact power_quandle.pow_1 a,
-  },
-  {
-    intros a n m,
-    ext1,
-    cases a with a ha,
-    repeat {rw spq_pow_def},
-    simp only [subtype.coe_mk],
-    exact power_quandle.pow_comp a n m,
-  },
-  {
-    intros a b,
-    ext1,
-    cases a with a ha,
-    cases b with b hb,
-    repeat {rw spq_pow_def},
-    repeat {rw spq_rhd_def},
-    simp only [subtype.coe_mk],
-    exact power_quandle.q_pow0 a b,
-  },
-  {
-    intros a b,
-    ext1,
-    cases a with a ha,
-    cases b with b hb,
-    repeat {rw spq_pow_def},
-    repeat {rw spq_rhd_def},
-    simp only [subtype.coe_mk],
-    exact pow_0_rhd a b,
-  },
-  {
-    intros a,
-    ext1,
-    cases a with a ha,
-    repeat {rw spq_pow_def},
-    repeat {rw spq_rhd_def},
-    simp only [subtype.coe_mk],
-    rw ←power_quandle.q_powneg_left,
-    exact quandle.self_idem_left a,
-  },
-  {
-    intros a b n,
-    ext1,
-    cases a with a ha,
-    cases b with b hb,
-    repeat {rw spq_pow_def},
-    repeat {rw spq_rhd_def},
-    repeat {rw spq_pow_def},
-    simp only [subtype.coe_mk],
-    exact power_quandle.q_pown_right a b n,
-  },
-  {
-    intros a b n m,
-    ext1,
-    cases a with a ha,
-    cases b with b hb,
-    repeat {rw spq_pow_def},
-    repeat {rw spq_rhd_def},
-    repeat {rw spq_pow_def},
-    simp only [subtype.coe_mk],
-    exact power_quandle.q_powadd a b n m,
-  },
+  cases a with a ha,
+  cases b with b hb,
+  refl,
 end
+
+lemma coe_pow (a : Q1) (n : ℤ) : (↑a : Q) ^ n = ↑(a ^ n) := 
+begin
+  cases a with a ha,
+  refl,
+end
+
+lemma coe_one : (↑(1 : Q1) : Q) = 1 := rfl
+
+instance sub_power_quandle_is_pq : power_quandle Q1 := { 
+  rhd_dist := begin 
+    rintros ⟨a, ha⟩ ⟨b, hb⟩ ⟨c, hc⟩,
+    simp only [spq_rhd_def, subtype.mk_eq_mk],
+    apply power_quandle.rhd_dist,
+  end,
+  rhd_idem := begin 
+    rintros ⟨a, ha⟩,
+    simp only [spq_rhd_def, subtype.mk_eq_mk],
+    apply power_quandle.rhd_idem,
+  end,
+  pow_one := begin 
+    rintros ⟨a, ha⟩,
+    simp only [spq_pow_def, subtype.mk_eq_mk],
+    apply power_quandle.pow_one,
+  end,
+  pow_zero := begin 
+    rintros ⟨a, ha⟩,
+    simp only [spq_pow_def, spq_one_def, subtype.mk_eq_mk],
+    apply power_quandle.pow_zero,
+  end,
+  pow_comp := begin 
+    rintros ⟨a, ha⟩ n m,
+    simp only [spq_pow_def, subtype.mk_eq_mk],
+    apply power_quandle.pow_comp,
+  end,
+  rhd_one := begin 
+    rintros ⟨a, ha⟩,
+    simp only [spq_rhd_def, spq_one_def, subtype.mk_eq_mk],
+    apply power_quandle.rhd_one,
+  end,
+  one_rhd := begin 
+    rintros ⟨a, ha⟩,
+    simp only [spq_rhd_def, spq_one_def, subtype.mk_eq_mk],
+    apply power_quandle.one_rhd,
+  end,
+  pow_rhd := begin 
+    rintros ⟨a, ha⟩ ⟨b, hb⟩ n,
+    simp only [spq_rhd_def, spq_pow_def, subtype.mk_eq_mk],
+    apply power_quandle.pow_rhd,
+  end,
+  rhd_pow_add := begin 
+    rintros ⟨a, ha⟩ ⟨b, hb⟩ n m,
+    simp only [spq_rhd_def, spq_pow_def, subtype.mk_eq_mk],
+    apply power_quandle.rhd_pow_add,
+  end,
+  ..sub_power_quandle_has_rhd,
+  ..sub_power_quandle_has_pow,
+  ..sub_power_quandle_has_one }
 
 
 
 end sub_power_quandle
+
+
+section sub_pq_le
+
+variables {Q : Type u} [power_quandle Q]
+
+instance sub_pq_has_le : has_le (sub_power_quandle Q) := ⟨λ Q1 Q2, Q1.carrier ⊆ Q2.carrier⟩
+
+lemma sub_pq_le_def (Q1 Q2 : sub_power_quandle Q) : Q1 ≤ Q2 ↔ Q1.carrier ⊆ Q2.carrier := by refl
+
+end sub_pq_le
+
+
+section sub_pq_univ
+
+def sub_pq_univ (Q : Type u) [power_quandle Q] : sub_power_quandle Q := { 
+  carrier := set.univ,
+  closed_rhd := begin 
+    intros, exact dec_trivial,
+  end,
+  closed_pow := begin 
+    intros, exact dec_trivial,
+  end,
+  closed_one := begin 
+    intros, exact dec_trivial,
+  end }
+
+variables {Q : Type u} [power_quandle Q]
+
+def sub_pq_univ_iso_pq : sub_pq_univ Q ≃ Q :=
+begin
+  fconstructor,
+  {
+    intro x,
+    cases x with x hx,
+    exact x,
+  },
+  {
+    intro x,
+    fconstructor,
+    exact x,
+    fconstructor,
+  },
+  {
+    intro x,
+    cases x,
+    refl,
+  },
+  {
+    intro x,
+    refl,
+  },
+end
+
+lemma sub_pq_univ_iso_pq_is_pq_morphism : is_pq_morphism (@sub_pq_univ_iso_pq Q _) :=
+begin
+  split,
+  {
+    intros a b,
+    cases a,
+    cases b,
+    refl,
+  },
+  {
+    intros a n,
+    cases a,
+    refl,
+  },
+end
+
+lemma sub_pq_univ_le (Q1 : sub_power_quandle Q) : Q1 ≤ sub_pq_univ Q :=
+begin
+  rw sub_pq_le_def,
+  tauto,
+end
+
+end sub_pq_univ

@@ -21,97 +21,28 @@ variables {Q : Type u} [abelian_power_quandle Q]
 
 lemma rhd_interact_add : ∀ a b c d : Q, (a ▷ b) + (c ▷ d) = (a + c) ▷ (b + d) := 
 begin
-    intros a b c d,
-    have add_is_morph := abelian_power_quandle.apq_addition_is_morphism,
-    cases add_is_morph with h _,
-    have h1 := h (a, c) (b, d),
-    simp at h1,
-    repeat {rw rhd_def_prod at h1},
-    simp at h1,
-    assumption,
+  intros a b c d,
+  have add_is_morph := abelian_power_quandle.apq_addition_is_morphism,
+  cases add_is_morph with h _,
+  have h1 := h (a, c) (b, d),
+  simp at h1,
+  repeat {rw rhd_def_prod at h1},
+  simp at h1,
+  assumption,
 end
 
 
 lemma pow_dist_add : ∀ a b : Q, ∀ n : int, (a + b) ^ n = a ^ n + b ^ n := 
 begin
-    intros a b n,
-    have add_is_morph := abelian_power_quandle.apq_addition_is_morphism,
-    cases add_is_morph with _ h,
-    have h1 := h (a, b) n,
-    simp at h1,
-    repeat {rw pow_def_prod at h1},
-    simp at h1,
-    apply eq.symm,
-    assumption,
-end
-
-def ε (a : Q) := a ▷ 0
-def α (a : Q) := 0 ▷ a
-
-lemma ε_def (a : Q) : ε(a) = a ▷ 0 := rfl
-lemma α_def (a : Q) : α(a) = 0 ▷ a := rfl
-
-lemma rhd_as_eps_add_alpha : ∀ a b : Q, a ▷ b = ε(a) + α(b) :=
-begin
-    intros a b,
-    rw ←abelian_power_quandle.apq_addition_zero_right a,
-    rw ←abelian_power_quandle.apq_addition_zero_left b,
-    rw ←rhd_interact_add,
-    rw abelian_power_quandle.apq_addition_zero_right a,
-    rw abelian_power_quandle.apq_addition_zero_left b,
-    refl,
-end
-
-lemma alpha_is_id : ∀ a : Q, α(a) = a := 
-begin
-    intro a,
-    have eps_a_pow_0 : ε(a ^ (0 : int)) = 0,
-    {
-        rw ε_def,
-        rw pow_0_rhd,
-    },
-    apply eq.symm,
-    have a_eq_sum : a = ε(a ^ (0 : int)) + α(a),
-    {
-        rw ←rhd_as_eps_add_alpha,
-        rw pow_0_rhd,
-    },
-    rw eps_a_pow_0 at a_eq_sum,
-    rw abelian_power_quandle.apq_addition_zero_left at a_eq_sum,
-    assumption,
-end
-
-lemma eps_is_zero : ∀ a : Q, ε(a) = 0 :=
-begin
-    intro a,
-    have goal_symm : 0 = ε(a),
-    {
-        exact calc 0 = a + -a : by rw abelian_power_quandle.apq_inverse_addition_right
-                ...  = a ▷ a + -a : by rw quandle.self_idem_right
-                ...  = ε(a) + α(a) + -a: by rw rhd_as_eps_add_alpha
-                ...  = ε(a) + a + -a : by rw alpha_is_id
-                ...  = ε(a) + (a + -a) : by rw abelian_power_quandle.apq_addition_assoc
-                ...  = ε(a) + 0 : by rw abelian_power_quandle.apq_inverse_addition_right
-                ...  = ε(a) : by rw abelian_power_quandle.apq_addition_zero_right,
-    },
-    apply eq.symm,
-    assumption,
-end
-
-theorem apq_rhd_is_right : ∀ a b : Q, a ▷ b = b :=
-begin
-    intros a b,
-    rw rhd_as_eps_add_alpha,
-    rw eps_is_zero,
-    rw alpha_is_id,
-    exact abelian_power_quandle.apq_addition_zero_left b,
-end
-
-theorem apq_lhd_is_left : ∀ a b : Q, b ◁ a = b :=
-begin
-    intros a b,
-    rw power_quandle.q_powneg_left,
-    rw apq_rhd_is_right,
+  intros a b n,
+  have add_is_morph := abelian_power_quandle.apq_addition_is_morphism,
+  cases add_is_morph with _ h,
+  have h1 := h (a, b) n,
+  simp at h1,
+  repeat {rw pow_def_prod at h1},
+  simp at h1,
+  apply eq.symm,
+  assumption,
 end
 
 lemma apq_zero_pow : ∀ n : int, (0 : Q) ^ n = 0 :=
@@ -123,6 +54,39 @@ begin
     simp at h2,
     rw ←h2,
 end
+
+lemma zero_is_one : (0 : Q) = (1 : Q) :=
+begin
+  suffices : (0 : Q) = 0 ^ (0 : ℤ),
+  rw this,
+  rw power_quandle.pow_zero,
+  rw apq_zero_pow,
+end
+
+
+theorem apq_rhd_is_right : ∀ a b : Q, a ▷ b = b :=
+begin
+  intros a b,
+  conv {
+    to_lhs,
+    rw ←abelian_power_quandle.apq_addition_zero_right a,
+    rw ←abelian_power_quandle.apq_addition_zero_left b,
+  },
+  rw ←rhd_interact_add,
+  rw zero_is_one,
+  rw power_quandle.rhd_one,
+  rw power_quandle.one_rhd,
+  rw ←zero_is_one,
+  rw abelian_power_quandle.apq_addition_zero_left,
+end
+
+theorem apq_lhd_is_left : ∀ a b : Q, b ◁ a = b :=
+begin
+    intros a b,
+    rw lhd_rhd_pow,
+    rw apq_rhd_is_right,
+end
+
 
 lemma apq_neg_pow : ∀ a : Q, ∀ n : int, (-a) ^ n = -(a ^ n) :=
 begin

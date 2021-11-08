@@ -1,13 +1,13 @@
 
 import pq_to_group
-import tactic
-
+import pq_union
 
 universes u v
 
 section pq_group_union
 
 variables {Q1 : Type u} {Q2 : Type v} [power_quandle Q1] [power_quandle Q2]
+
 
 lemma group_prod_pow_nat {G : Type u} {H : Type v} [group G] [group H] (a : G) (b : H) (n : ℕ) : (a, b)^n = (a^n, b^n) :=
 begin
@@ -27,114 +27,112 @@ begin
   simp only [prod.inv_mk],
 end
 
-def pq_group_oplus_to_prod : pq_group (Q1 ⊕ Q2) →* pq_group Q1 × pq_group Q2 :=
+lemma group_prod_rhd {G : Type u} {H : Type v} [group G] [group H] (a b : G) (c d : H) : (a, c) ▷ (b, d) = (a ▷ b, c ▷ d) :=
+begin
+  simp only [rhd_def_group],
+  refl,
+end
+
+def pq_group_oplus_to_prod : pq_group (pq_union Q1 Q2) →* pq_group Q1 × pq_group Q2 :=
 begin
   fapply pq_morph_to_L_morph_adj,
   {
-    intro x,
-    cases x,
+    fapply pq_union_map_from,
     {
-      exact ⟨of x, 1⟩,
+      intros x,
+      exact (of x, 1),
     },
     {
-      exact ⟨1, of x⟩,
+      split,
+      {
+        intros a b,
+        rw ←rhd_of_eq_of_rhd,
+        rw group_prod_rhd,
+        rw power_quandle.one_rhd,
+      },
+      {
+        intros a n,
+        rw of_pow_eq_pow_of,
+        rw group_prod_pow,
+        simp only [one_gpow],
+      },
     },
+    {
+      intros x,
+      exact (1, of x),
+    },
+    {
+      split,
+      {
+        intros a b,
+        rw ←rhd_of_eq_of_rhd,
+        rw group_prod_rhd,
+        rw power_quandle.one_rhd,
+      },
+      {
+        intros a n,
+        rw of_pow_eq_pow_of,
+        rw group_prod_pow,
+        simp only [one_gpow],
+      },
+    },
+  },
+  {
+    apply pq_union_map_from_is_pq_morphism,
+    {
+      intros a b,
+      rw rhd_def_group,
+      simp only [one_inv, mul_one, one_mul, prod.inv_mk, mul_right_inv, prod.mk_mul_mk],
+    },
+    {
+      intros a b,
+      rw rhd_def_group,
+      simp only [one_inv, mul_one, one_mul, prod.inv_mk, mul_right_inv, prod.mk_mul_mk],
+    },
+  },
+end
+
+def pq_group_left_to_oplus : pq_group Q1 →* pq_group (pq_union Q1 Q2) :=
+begin
+  fapply L_of_morph,
+  {
+    fapply pq_union_map_to,
+    exact sum.inl,
   },
   {
     split,
     {
       intros a b,
-      cases a;
-      cases b,
-      {
-        rw rhd_def_union_ll,
-        simp only,
-        rw ←rhd_of_eq_of_rhd,
-        rw rhd_def,
-        rw rhd_def,
-        simp only [one_inv, mul_one, prod.inv_mk, prod.mk_mul_mk],
-      },
-      {
-        rw rhd_def_union_lr,
-        simp only,
-        rw rhd_def,
-        simp only [one_inv, mul_one, one_mul, prod.inv_mk, mul_right_inv, prod.mk_mul_mk],
-      },
-      {
-        rw rhd_def_union_rl,
-        simp only,
-        rw rhd_def,
-        simp only [one_inv, mul_one, one_mul, prod.inv_mk, mul_right_inv, prod.mk_mul_mk],
-      },
-      {
-        rw rhd_def_union_rr,
-        simp only,
-        rw ←rhd_of_eq_of_rhd,
-        rw rhd_def,
-        rw rhd_def,
-        simp only [one_inv, mul_one, prod.inv_mk, prod.mk_mul_mk],
-      },
+      refl,
     },
     {
       intros a n,
-      cases a,
-      {
-        rw pow_def_union_l,
-        simp only,
-        rw of_pow_eq_pow_of,
-        rw group_prod_pow,
-        simp only [one_gpow],
-      },
-      {
-        rw pow_def_union_r,
-        simp only,
-        rw of_pow_eq_pow_of,
-        rw group_prod_pow,
-        simp only [one_gpow],
-      },
-    }
-  }
+      refl,
+    },
+  },
 end
 
-def pq_group_left_to_oplus : pq_group Q1 →* pq_group (Q1 ⊕ Q2) :=
+def pq_group_right_to_oplus : pq_group Q2 →* pq_group (pq_union Q1 Q2) :=
 begin
   fapply L_of_morph,
   {
-    intro x,
-    left,
-    exact x,
-  },
-  split,
-  {
-    intros a b,
-    rw rhd_def_union_ll,
+    fapply pq_union_map_to,
+    exact sum.inr,
   },
   {
-    intros a n,
-    rw pow_def_union_l,
+    split,
+    {
+      intros a b,
+      refl,
+    },
+    {
+      intros a n,
+      refl,
+    },
   },
 end
 
-def pq_group_right_to_oplus : pq_group Q2 →* pq_group (Q1 ⊕ Q2) :=
-begin
-  fapply L_of_morph,
-  {
-    intro x,
-    right,
-    exact x,
-  },
-  split,
-  {
-    intros a b,
-    rw rhd_def_union_rr,
-  },
-  {
-    intros a n,
-    rw pow_def_union_r,
-  },
-end
-
-def pq_group_prod_to_oplus : pq_group Q1 × pq_group Q2 →* pq_group (Q1 ⊕ Q2) :=
+def pq_group_prod_to_oplus : pq_group Q1 × pq_group Q2 →* pq_group (pq_union Q1 Q2) :=
 begin
   fconstructor,
   {
@@ -175,8 +173,8 @@ begin
       },
       {
         rw ←of_def,
-        have fun_of_rw_l : pq_group_left_to_oplus (of y1) = of ((sum.inl y1) : Q1 ⊕ Q2) := rfl,
-        rw fun_of_rw_l,
+        unfold pq_group_left_to_oplus,
+        rw L_of_morph_of,
         induction x2,
         {
           rw quot_mk_helper,
@@ -187,15 +185,10 @@ begin
           },
           {
             rw ←of_def,
-            have fun_of_rw_r : pq_group_right_to_oplus (of x2) = of ((sum.inr x2) : Q1 ⊕ Q2) := rfl,
-            rw fun_of_rw_r,
-            suffices : (of (sum.inr x2)) * (of (sum.inl y1)) * (of (sum.inr x2))⁻¹ = of (sum.inl y1),
-            {
-              apply eq.symm,
-              rw center_reformulate,
-              exact this,
-            },
-            rw ←rhd_def,
+            unfold pq_group_right_to_oplus,
+            rw L_of_morph_of,
+            rw center_reformulate,
+            rw ←rhd_def_group,
             rw rhd_of_eq_of_rhd,
             apply congr_arg,
             refl,
@@ -264,30 +257,26 @@ begin
       rw ←of_def,
       unfold pq_group_oplus_to_prod,
       rw pq_morph_to_L_morph_adj_comm_of,
-      cases x,
+      induction x,
       {
-        simp only,
-        unfold pq_group_prod_to_oplus,
-        simp only [mul_one, monoid_hom.coe_mk, monoid_hom.map_one],
+        rw quot_mk_helper_pq_union,
+        unfold pq_union_map_from,
+        unfold pq_union_map_from_pre,
+        cases x;
+        simp only [quotient.lift_on_beta, sum.elim_inl, sum.elim_inr];
+        unfold pq_group_prod_to_oplus;
+        simp only [mul_one, one_mul, monoid_hom.coe_mk, monoid_hom.map_one];
         refl,
       },
-      {
-        simp only,
-        unfold pq_group_prod_to_oplus,
-        simp only [one_mul, monoid_hom.coe_mk, monoid_hom.map_one],
-        refl,
-      }
+      {refl,},
     },
     {
       rw ←mul_def,
-      simp only [monoid_hom.map_mul],
-      rw x_ih_a,
-      rw x_ih_b,
+      simp only [monoid_hom.map_mul, x_ih_a, x_ih_b],
     },
     {
       rw ←inv_def,
-      simp only [inv_inj, monoid_hom.map_inv],
-      assumption,
+      simp only [x_ih, monoid_hom.map_inv],
     },
   },
   {refl,},
@@ -325,18 +314,14 @@ begin
       },
       {
         rw ←mul_def,
-        simp only [monoid_hom.map_mul],
-        rw x1_ih_a,
-        rw x1_ih_b,
+        simp only [monoid_hom.map_mul, x1_ih_a, x1_ih_b],
         simp only [mul_one, prod.mk_mul_mk],
       },
       {
         rw ←inv_def,
-        simp only [monoid_hom.map_inv],
-        rw x1_ih,
+        simp only [x1_ih, monoid_hom.map_inv],
         simp only [one_inv, prod.inv_mk],
       },
-      
     },
     {refl,},
   },
@@ -357,30 +342,27 @@ begin
       },
       {
         rw ←mul_def,
-        simp only [monoid_hom.map_mul],
-        rw x2_ih_a,
-        rw x2_ih_b,
+        simp only [monoid_hom.map_mul, x2_ih_a, x2_ih_b],
         simp only [mul_one, prod.mk_mul_mk],
       },
       {
         rw ←inv_def,
-        simp only [monoid_hom.map_inv],
-        rw x2_ih,
+        simp only [x2_ih, monoid_hom.map_inv],
         simp only [one_inv, prod.inv_mk],
       },
-      
     },
     {refl,},
   },
 end
 
-def pq_group_union : pq_group (Q1 ⊕ Q2) ≃* pq_group Q1 × pq_group Q2 := { 
+def pq_group_union : pq_group (pq_union Q1 Q2) ≃* pq_group Q1 × pq_group Q2 := { 
   to_fun := pq_group_oplus_to_prod,
   inv_fun := pq_group_prod_to_oplus,
   left_inv := congr_fun pq_group_union_prod_inv_left,
   right_inv := congr_fun pq_group_union_prod_inv_right,
   map_mul' := is_mul_hom.map_mul _ }
 
-#check pq_group_union
+
 
 end pq_group_union
+

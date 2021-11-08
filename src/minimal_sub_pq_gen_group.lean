@@ -123,6 +123,14 @@ begin
   refl,
 end
 
+lemma free_pq_gen_of_one (gen : set G) : @free_pq_gen_of _ _ gen (1 : G) (free_group_sub_pq_carrier.one) = 1 :=
+begin
+  unfold free_pq_gen_of,
+  rw ←of_one,
+  apply congr_arg,
+  refl,
+end
+
 lemma generated_by_rhd (gen : set G) (x y : G) (hx : generated_by gen x) (hy : generated_by gen y) : generated_by gen (x ▷ y) :=
 begin
   apply generated_by.mul,
@@ -158,6 +166,11 @@ begin
   },
 end
 
+lemma generated_by_one (gen : set G) : generated_by gen 1 :=
+begin
+  apply generated_by.unit,
+end
+
 def pq_gen_set_gen_set (gen : set G) : set (pq_group (free_gen_group_sub_pq gen)) := λ x : pq_group (free_gen_group_sub_pq gen), 
 ∃ g ∈ gen, x = pq_gen_of g H
 
@@ -184,7 +197,7 @@ begin
         refl,
       },
       {
-        simp_rw ←rhd_def,
+        simp_rw ←rhd_def_group,
         suffices : generated_by (pq_gen_set_gen_set gen) ((free_pq_gen_of hx_x hx_hx) ▷ (free_pq_gen_of hx_y hx_hy)),
         convert this,
         {
@@ -203,6 +216,14 @@ begin
         },
         apply generated_by_pow,
         assumption,
+      },
+      {
+        suffices : generated_by (pq_gen_set_gen_set gen) (1),
+        convert this,
+        {
+          rw free_pq_gen_of_one,
+        },
+        apply generated_by_one,
       },
     },
     {

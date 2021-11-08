@@ -11,6 +11,7 @@ structure group_sub_pq (G : Type u) [group G] :=
 (carrier : set G)
 (closed_rhd : ∀ x y : G, x ∈ carrier → y ∈ carrier → (x * y * x⁻¹) ∈ carrier)
 (closed_pow : ∀ x : G, ∀ n : ℤ, x ∈ carrier → x ^ n ∈ carrier)
+(closed_one : (1 : G) ∈ carrier)
 
 variables {G : Type u} [group G]
 
@@ -18,6 +19,7 @@ inductive free_group_sub_pq_carrier (gen : set G) : G → Prop
 | incl (x : G) (hx : x ∈ gen) : free_group_sub_pq_carrier x
 | rhd (x y : G) (hx : free_group_sub_pq_carrier x) (hy : free_group_sub_pq_carrier y) : free_group_sub_pq_carrier (x * y * x⁻¹)
 | pow (x : G) (n : ℤ) (hx : free_group_sub_pq_carrier x) : free_group_sub_pq_carrier (x ^ n)
+| one : free_group_sub_pq_carrier (1)
 
 lemma gen_in_free_group_sub_pq_carrier (gen : set G) : gen ≤ free_group_sub_pq_carrier gen :=
 begin
@@ -30,13 +32,15 @@ def free_group_sub_pq (gen : set G) : group_sub_pq G := {
   carrier := free_group_sub_pq_carrier gen,
   closed_rhd := free_group_sub_pq_carrier.rhd,
   closed_pow := free_group_sub_pq_carrier.pow, 
+  closed_one := free_group_sub_pq_carrier.one
 }
 
 
 def gen_group_sub_pq (x : group_sub_pq G) : sub_power_quandle G := { 
   carrier := x.carrier,
   closed_rhd := x.closed_rhd,
-  closed_pow := x.closed_pow }
+  closed_pow := x.closed_pow,
+  closed_one := x.closed_one }
 
 
 def free_gen_group_sub_pq (gen : set G) : sub_power_quandle G := gen_group_sub_pq (free_group_sub_pq gen)
@@ -54,7 +58,7 @@ def of_gen_group_sub_pq : group_sub_pq (pq_group Q) := {
   carrier := of_gen,
   closed_rhd := begin
     intros x y hx hy,
-    rw ←rhd_def,
+    rw ←rhd_def_group,
     cases hx with q1 hq1,
     cases hy with q2 hq2,
     use (q1 ▷ q2),
@@ -68,6 +72,10 @@ def of_gen_group_sub_pq : group_sub_pq (pq_group Q) := {
     use (q^n),
     rw hq,
     rw of_pow_eq_pow_of,
+  end,
+  closed_one := begin 
+    use 1,
+    rw of_one,
   end }
 
 def pq_group_to_sub_pq : (pq_group Q) →* (pq_group (gen_group_sub_pq (@of_gen_group_sub_pq Q _))) := 

@@ -1,6 +1,6 @@
 
 
-import pq_induce_lhd
+import power_quandle
 
 universes u u1 u2
 
@@ -51,7 +51,7 @@ instance pq_general_rel_setoid : setoid Q := {
 
 def pq_quotient (Q : Type u) [power_quandle Q] [has_pq_rel Q] : Type u := quotient (@pq_general_rel_setoid Q _ _)
 
-instance pq_quotient_rhd : has_triangle_right (pq_quotient Q) := ⟨quotient.lift₂ (λ x y : Q, (⟦x ▷ y⟧ : pq_quotient Q)) begin 
+instance pq_quotient_rhd : has_rhd (pq_quotient Q) := ⟨quotient.lift₂ (λ x y : Q, (⟦x ▷ y⟧ : pq_quotient Q)) begin 
   intros a b c d hac hbd,
   simp only [quotient.eq],
   cases hac,
@@ -70,15 +70,19 @@ instance pq_quotient_pow : has_pow (pq_quotient Q) ℤ := ⟨λ x n, quotient.li
   exact pq_general_rel'.congr_pow hab_hxy,
 end⟩
 
+instance pq_quotient_one : has_one (pq_quotient Q) := ⟨⟦1⟧⟩
+
 lemma quot_mk_helper_pq_quotient (a : Q) : quot.mk setoid.r a = ⟦a⟧ := rfl
 
 lemma pq_quotient_rhd_def (a b : Q) : (⟦a⟧ ▷ ⟦b⟧ : pq_quotient Q) = ⟦a ▷ b⟧ := rfl
 
 lemma pq_quotient_pow_def (a : Q) (n : ℤ) : (⟦a⟧ ^ n : pq_quotient Q) = ⟦a ^ n⟧ := rfl
 
+lemma pq_quotient_one_def : (1 : pq_quotient Q) = (⟦1⟧ : pq_quotient Q) := rfl
+
 instance pq_quotient_is_pq : power_quandle (pq_quotient Q) :=
 begin
-  apply induce_lhd,
+  fconstructor,
   {
     intros a b c,
     induction a,
@@ -87,7 +91,7 @@ begin
     {
       simp only [quot_mk_helper_pq_quotient, pq_quotient_rhd_def],
       apply congr_arg,
-      apply rack.right_dist,
+      apply power_quandle.rhd_dist,
     },
     repeat {refl,},
   },
@@ -97,7 +101,7 @@ begin
     {
       simp only [quot_mk_helper_pq_quotient, pq_quotient_rhd_def],
       apply congr_arg,
-      apply quandle.self_idem_right,
+      apply power_quandle.rhd_idem,
     },
     {refl,},
   },
@@ -107,7 +111,17 @@ begin
     {
       simp only [quot_mk_helper_pq_quotient, pq_quotient_pow_def],
       apply congr_arg,
-      apply power_quandle.pow_1,
+      apply power_quandle.pow_one,
+    },
+    {refl,},
+  },
+  {
+    intros a,
+    induction a,
+    {
+      simp only [quot_mk_helper_pq_quotient, pq_quotient_pow_def],
+      apply congr_arg,
+      apply power_quandle.pow_zero,
     },
     {refl,},
   },
@@ -122,34 +136,22 @@ begin
     {refl,},
   },
   {
-    intros a b,
+    intros a,
     induction a,
-    induction b,
     {
-      simp only [quot_mk_helper_pq_quotient, pq_quotient_rhd_def, pq_quotient_pow_def],
+      simp only [quot_mk_helper_pq_quotient, pq_quotient_one_def, pq_quotient_rhd_def],
       apply congr_arg,
-      apply power_quandle.q_pow0,
+      apply power_quandle.rhd_one,
     },
-    repeat {refl,},
-  },
-  {
-    intros a b,
-    induction a,
-    induction b,
-    {
-      simp only [quot_mk_helper_pq_quotient, pq_quotient_rhd_def, pq_quotient_pow_def],
-      apply congr_arg,
-      exact pow_0_rhd a b,
-    },
-    repeat {refl,},
+    {refl,},
   },
   {
     intros a,
     induction a,
     {
-      simp only [quot_mk_helper_pq_quotient, pq_quotient_rhd_def, pq_quotient_pow_def],
+      simp only [quot_mk_helper_pq_quotient, pq_quotient_one_def, pq_quotient_rhd_def],
       apply congr_arg,
-      exact pow_neg_one_rhd_self a,
+      apply power_quandle.one_rhd,
     },
     {refl,},
   },
@@ -160,7 +162,7 @@ begin
     {
       simp only [quot_mk_helper_pq_quotient, pq_quotient_rhd_def, pq_quotient_pow_def],
       apply congr_arg,
-      exact power_quandle.q_pown_right a b n,
+      exact power_quandle.pow_rhd a b n,
     },
     repeat {refl,},
   },
@@ -171,7 +173,7 @@ begin
     {
       simp only [quot_mk_helper_pq_quotient, pq_quotient_rhd_def, pq_quotient_pow_def],
       apply congr_arg,
-      exact power_quandle.q_powadd a b n m,
+      exact power_quandle.rhd_pow_add a b n m,
     },
     repeat {refl,},
   },
