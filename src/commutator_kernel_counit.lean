@@ -2,6 +2,7 @@
 import counit_ker_abelian
 import pq_induction_principles
 import group_theory.abelianization
+import conj_pq
 
 universe u
 
@@ -62,5 +63,38 @@ begin
   rw power_quandle.one_rhd,
 end
 
+lemma commutator_with_of (x y : pq_group G) : x * y * x⁻¹ * y⁻¹ = of (counit x) * of (counit y) * (of (counit x))⁻¹ * (of (counit y))⁻¹ :=
+begin
+  rw ←rhd_def_group,
+  rw inner_aut_eq,
+  rw rhd_def_group,
+  simp only [mul_assoc],
+  rw mul_right_inj,
+  simp only [←mul_assoc],
+  rw ←rhd_def_group,
+  rw inner_aut_eq,
+  rw rhd_def_group,
+end
+
+
 end commutator_counit_kernel
+
+section abelianization_to_conj_pq
+
+variables {G : Type u} [group G]
+
+def abelianization_to_conj_pq : abelianization G → conj_pq G :=
+begin
+  intros x,
+  induction x,
+  {
+    exact conj_pq_of x,
+  },
+  {
+    simp only [eq_rec_constant],
+    sorry,
+  },
+end
+
+end abelianization_to_conj_pq
 
